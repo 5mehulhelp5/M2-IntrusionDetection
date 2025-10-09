@@ -4,7 +4,7 @@
 
   <!-- Front controller plugin -->
   <type name="Magento\Framework\App\FrontControllerInterface">
-    <plugin name="merlin_intrusion_guard" type="Merlin\IntrusionDetection\Plugin\FrontController\IntrusionGuard" sortOrder="10"/>
+    <plugin name="merlin_intrusion_guard" type="Merlin\IntrusionDetection\Plugin\IntrusionGuard" sortOrder="10"/>
   </type>
 
   <!-- Inject detectors -->

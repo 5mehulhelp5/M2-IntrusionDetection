@@ -1,56 +1,117 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<listing name="merlin_intrusion_event_listing"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd"
+         name="merlin_intrusion_event_listing">
 
-  <argument name="data" xsi:type="array">
-    <item name="js_config" xsi:type="array">
-      <item name="provider" xsi:type="string">merlin_intrusion_event_listing.merlin_intrusion_event_listing_data_source</item>
-      <item name="deps" xsi:type="string">merlin_intrusion_event_listing.merlin_intrusion_event_listing_data_source</item>
-    </item>
-    <item name="storageConfig" xsi:type="array">
-      <item name="namespace" xsi:type="string">merlin_intrusion_event_listing</item>
-    </item>
-    <item name="spinner" xsi:type="string">listing_columns</item>
-  </argument>
-
-<dataSource name="merlin_intrusion_event_listing_data_source">
-  <argument name="dataProvider" xsi:type="configurableObject">
-    <argument name="class" xsi:type="string">
-      Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider
-    </argument>
-    <argument name="name" xsi:type="string">merlin_intrusion_event_listing_data_source</argument>
-    <argument name="primaryFieldName" xsi:type="string">event_id</argument>
-    <argument name="requestFieldName" xsi:type="string">event_id</argument>
     <argument name="data" xsi:type="array">
-      <item name="config" xsi:type="array">
-        <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
-        <item name="update_url" xsi:type="url" path="mui/index/render"/>
-        <item name="storageConfig" xsi:type="array">
-          <item name="indexField" xsi:type="string">event_id</item>
+        <item name="js_config" xsi:type="array">
+            <item name="provider" xsi:type="string">
+                merlin_intrusion_event_listing.merlin_intrusion_event_listing_data_source
+            </item>
+            <item name="deps" xsi:type="string">
+                merlin_intrusion_event_listing.merlin_intrusion_event_listing_data_source
+            </item>
         </item>
-      </item>
+        <item name="storageConfig" xsi:type="array">
+            <item name="namespace" xsi:type="string">merlin_intrusion_event_listing</item>
+        </item>
+        <item name="spinner" xsi:type="string">listing_columns</item>
     </argument>
-  </argument>
-</dataSource>
 
-  <listingToolbar name="listing_top">
-    <bookmark name="bookmarks"/>
-    <columnsControls name="columns_controls"/>
-    <exportButton name="export_button"/>
-    <filters name="listing_filters"/>
-    <paging name="listing_paging"/>
-  </listingToolbar>
+    <dataSource name="merlin_intrusion_event_listing_data_source">
+        <argument name="dataProvider" xsi:type="configurableObject">
+            <argument name="class" xsi:type="string">
+                Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider
+            </argument>
+            <argument name="name" xsi:type="string">merlin_intrusion_event_listing_data_source</argument>
+            <argument name="primaryFieldName" xsi:type="string">event_id</argument>
+            <argument name="requestFieldName" xsi:type="string">event_id</argument>
+        </argument>
+        <argument name="data" xsi:type="array">
+            <item name="js_config" xsi:type="array">
+                <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+            </item>
+            <item name="config" xsi:type="array">
+                <item name="update_url" xsi:type="url" path="mui/index/render"/>
+                <item name="storageConfig" xsi:type="array">
+                    <item name="indexField" xsi:type="string">event_id</item>
+                </item>
+            </item>
+        </argument>
+    </dataSource>
 
-  <columns name="listing_columns">
-    <selectionsColumn name="ids"/>
-    <column name="event_id"><settings><label>ID</label><sorting>desc</sorting><filter>text</filter></settings></column>
-    <column name="created_at"><settings><label>Created At (UTC)</label><dataType>date</dataType><filter>dateRange</filter></settings></column>
-    <column name="ip"><settings><label>IP</label><filter>text</filter></settings></column>
-    <column name="path"><settings><label>Path</label><filter>text</filter></settings></column>
-    <column name="user_agent"><settings><label>User Agent</label><filter>text</filter></settings></column>
-    <column name="detector"><settings><label>Detector</label><filter>text</filter></settings></column>
-    <column name="severity"><settings><label>Severity</label><filter>text</filter></settings></column>
-    <column name="details"><settings><label>Details</label><filter>text</filter></settings></column>
-  </columns>
+    <listingToolbar name="listing_top">
+        <buttons name="listing_buttons">
+            <button name="clear_log">
+                <settings>
+                    <label translate="true">Clear Log</label>
+                    <class>secondary</class>
+                    <url path="merlin_id/event/clear"/>
+                    <confirm>
+                        <message translate="true">This will delete all intrusion events. Continue?</message>
+                    </confirm>
+                </settings>
+            </button>
+        </buttons>
+        <bookmark name="bookmarks"/>
+        <columnsControls name="columns_controls"/>
+        <exportButton name="export_button"/>
+        <filters name="listing_filters"/>
+        <paging name="listing_paging"/>
+    </listingToolbar>
+
+    <columns name="listing_columns">
+        <selectionsColumn name="ids"/>
+        <column name="event_id">
+            <settings>
+                <label translate="true">ID</label>
+                <sorting>desc</sorting>
+                <filter>text</filter>
+            </settings>
+        </column>
+        <column name="created_at">
+            <settings>
+                <label translate="true">Created At (UTC)</label>
+                <dataType>date</dataType>
+                <filter>dateRange</filter>
+            </settings>
+        </column>
+        <column name="ip">
+            <settings>
+                <label translate="true">IP</label>
+                <filter>text</filter>
+            </settings>
+        </column>
+        <column name="path">
+            <settings>
+                <label translate="true">Path</label>
+                <filter>text</filter>
+            </settings>
+        </column>
+        <column name="user_agent">
+            <settings>
+                <label translate="true">User Agent</label>
+                <filter>text</filter>
+            </settings>
+        </column>
+        <column name="detector">
+            <settings>
+                <label translate="true">Detector</label>
+                <filter>text</filter>
+            </settings>
+        </column>
+        <column name="severity">
+            <settings>
+                <label translate="true">Severity</label>
+                <filter>text</filter>
+            </settings>
+        </column>
+        <column name="details">
+            <settings>
+                <label translate="true">Details</label>
+                <filter>text</filter>
+            </settings>
+        </column>
+    </columns>
 </listing>
+

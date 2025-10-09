@@ -43,6 +43,13 @@
           <label>Honeypot URL Path</label>
           <comment>Example: /_hp</comment>
         </field>
+         <field id="whitelist" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+         <label translate="true">Whitelist/Ignore IPs</label>
+         <comment translate="true">One IP or CIDR per line. Example:
+         127.0.0.1
+         192.0.2.0/24
+         </comment>
+        </field>                      
       </group>
     </section>
   </system>

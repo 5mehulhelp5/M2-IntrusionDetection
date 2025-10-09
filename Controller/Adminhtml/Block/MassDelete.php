@@ -1,18 +1,39 @@
 <?php
+declare(strict_types=1);
+
 namespace Merlin\IntrusionDetection\Controller\Adminhtml\Block;
+
 use Magento\Backend\App\Action;
-use Magento\Backend\App\Action\Context;
-use Magento\Ui\Component\MassAction\Filter;
-use Merlin\IntrusionDetection\Model\ResourceModel\BlockedIp\CollectionFactory;
-use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\App\ResourceConnection;
+
 class MassDelete extends Action
 {
-    const ADMIN_RESOURCE = 'Merlin_IntrusionDetection::blocks';
-    public function __construct(Context $context, private Filter $filter, private CollectionFactory $factory){ parent::__construct($context); }
-    public function execute(){
-        $c=$this->filter->getCollection($this->factory->create()); $n=0;
-        foreach($c as $i){ $i->delete(); $n++; }
-        $this->messageManager->addSuccessMessage(__('%1 record(s) were deleted.', $n));
-        return $this->resultFactory->create(ResultFactory::TYPE_REDIRECT)->setPath('*/*/');
+    public const ADMIN_RESOURCE = 'Merlin_IntrusionDetection::blocks';
+
+    /** @var ResourceConnection */
+    private $rc;
+
+    public function __construct(
+        Action\Context $context,
+        ResourceConnection $rc
+    ) {
+        parent::__construct($context);
+        $this->rc = $rc;
+    }
+
+    public function execute()
+    {
+        $ids = (array)($this->getRequest()->getParam('selected') ?? []);
+        $table = $this->rc->getTableName('merlin_blocked_ip');
+
+        if ($ids) {
+            $this->rc->getConnection()->delete($table, ['block_id IN (?)' => $ids]);
+            $this->messageManager->addSuccessMessage(__('Deleted %1 record(s).', count($ids)));
+        } else {
+            $this->messageManager->addNoticeMessage(__('No records selected.'));
+        }
+
+        // IMPORTANT: use the inherited factory from AbstractAction
+        return $this->resultRedirectFactory->create()->setPath('*/*/');
     }
 }

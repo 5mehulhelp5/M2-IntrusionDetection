@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
+
 namespace Merlin\IntrusionDetection\Api;
+
 interface BlockServiceInterface {
     public function block(string $ip, string $reason = null, int $minutes = 60): void;
     public function unblock(string $ip): void;

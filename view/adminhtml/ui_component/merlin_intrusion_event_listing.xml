@@ -91,7 +91,7 @@
       <settings><label>Details</label><filter>text</filter></settings>
     </column>
 
-    <!-- Leave row actions out unless you add Event\Delete controller
+    <!-- Leaving row actions out unless we add an Event\Delete controller in a later release
     <column name="actions">
       <argument name="data" xsi:type="array">
         <item name="config" xsi:type="array">

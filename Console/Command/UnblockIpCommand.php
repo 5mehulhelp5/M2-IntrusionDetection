@@ -17,6 +17,7 @@ class UnblockIpCommand extends Command {
             ->addArgument('ip', InputArgument::REQUIRED);
         parent::configure();
     }
+
     protected function execute(InputInterface $in, OutputInterface $out): int {
         $ip=(string)$in->getArgument('ip'); $this->svc->unblock($ip);
         $out->writeln("<info>Unblocked {$ip}.</info>"); return Command::SUCCESS;

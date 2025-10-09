@@ -2,7 +2,11 @@ An extensible, defense‑in‑depth Intrusion Detection & Prevention module for 
 
 #v2.2.3
 Fixed not blocking ip addresses
+
+
 Fixed not removing expired ip's
+
+
 Added whitelist.
 
 #v2.0.0

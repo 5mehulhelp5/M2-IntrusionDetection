@@ -4,20 +4,32 @@
   <system>
     <section id="merlin_intrusion" translate="label" type="text" sortOrder="950" showInDefault="1" showInWebsite="1" showInStore="1">
       <label>Merlin Intrusion Detection</label>
+      <!-- Keep the tab you had when it worked -->
       <tab>security</tab>
       <resource>Merlin_IntrusionDetection::config</resource>
+
       <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
         <label>General</label>
+
         <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Enabled</label>
           <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
         </field>
+
         <field id="mode" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Action Mode</label>
+          <!-- your working source model (we add the class below) -->
           <source_model>Merlin\IntrusionDetection\Model\Config\Source\Mode</source_model>
           <comment>Detect = log only; Block = 403 + auto-block on high/critical.</comment>
         </field>
+
+        <!-- NEW: Whitelist/Ignore IPs -->
+        <field id="whitelist" translate="label" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+          <label>Whitelist (comma or newline separated IPs)</label>
+          <comment>Requests from these IPs bypass detectors and blocks.</comment>
+        </field>
       </group>
+
       <group id="ratelimit" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
         <label>Rate Limiting</label>
         <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -33,6 +45,7 @@
           <validate>validate-number</validate>
         </field>
       </group>
+
       <group id="honeypot" translate="label" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
         <label>Honeypot</label>
         <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -43,13 +56,6 @@
           <label>Honeypot URL Path</label>
           <comment>Example: /_hp</comment>
         </field>
-         <field id="whitelist" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-         <label translate="true">Whitelist/Ignore IPs</label>
-         <comment translate="true">One IP or CIDR per line. Example:
-         127.0.0.1
-         192.0.2.0/24
-         </comment>
-        </field>                      
       </group>
     </section>
   </system>

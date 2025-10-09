@@ -1,142 +1,153 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd"
-         name="merlin_blocked_ip_listing">
+<listing name="merlin_blocked_ip_listing"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
 
-    <argument name="data" xsi:type="array">
-        <item name="js_config" xsi:type="array">
-            <item name="provider" xsi:type="string">
-                merlin_blocked_ip_listing.merlin_blocked_ip_listing_data_source
-            </item>
-            <item name="deps" xsi:type="string">
-                merlin_blocked_ip_listing.merlin_blocked_ip_listing_data_source
-            </item>
+  <argument name="data" xsi:type="array">
+    <item name="js_config" xsi:type="array">
+      <!-- Provider + single deps entry to avoid spinner -->
+      <item name="provider" xsi:type="string">
+        merlin_blocked_ip_listing.merlin_blocked_ip_listing_data_source
+      </item>
+      <item name="deps" xsi:type="string">
+        merlin_blocked_ip_listing.merlin_blocked_ip_listing_data_source
+      </item>
+    </item>
+    <item name="storageConfig" xsi:type="array">
+      <item name="namespace" xsi:type="string">merlin_blocked_ip_listing</item>
+    </item>
+    <item name="spinner" xsi:type="string">listing_columns</item>
+  </argument>
+
+  <dataSource name="merlin_blocked_ip_listing_data_source">
+    <argument name="dataProvider" xsi:type="configurableObject">
+      <argument name="class" xsi:type="string">
+        Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider
+      </argument>
+      <argument name="name" xsi:type="string">merlin_blocked_ip_listing_data_source</argument>
+      <argument name="primaryFieldName" xsi:type="string">block_id</argument>
+      <argument name="requestFieldName" xsi:type="string">block_id</argument>
+      <!-- keep config nested here (matches your known-good pattern) -->
+      <argument name="data" xsi:type="array">
+        <item name="config" xsi:type="array">
+          <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+          <item name="update_url" xsi:type="url" path="mui/index/render"/>
+          <item name="storageConfig" xsi:type="array">
+            <item name="indexField" xsi:type="string">block_id</item>
+          </item>
         </item>
-        <item name="storageConfig" xsi:type="array">
-            <item name="namespace" xsi:type="string">merlin_blocked_ip_listing</item>
-        </item>
-        <item name="spinner" xsi:type="string">listing_columns</item>
+      </argument>
     </argument>
+  </dataSource>
 
-    <dataSource name="merlin_blocked_ip_listing_data_source">
-        <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">
-                Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider
-            </argument>
-            <argument name="name" xsi:type="string">merlin_blocked_ip_listing_data_source</argument>
-            <argument name="primaryFieldName" xsi:type="string">block_id</argument>
-            <argument name="requestFieldName" xsi:type="string">block_id</argument>
-        </argument>
-        <argument name="data" xsi:type="array">
-            <item name="js_config" xsi:type="array">
-                <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
+  <listingToolbar name="listing_top">
+    <buttons name="listing_buttons">
+      <!-- Standard toolbar button; no ACL gating to avoid hides -->
+      <button name="add" component="Magento_Ui/js/grid/buttons/button">
+        <settings>
+          <label translate="true">Add Blocked IP</label>
+          <class>primary</class>
+          <!-- Either explicit path or */*/new; explicit is fine -->
+          <url path="merlin_id/block/new"/>
+          <sortOrder>10</sortOrder>
+        </settings>
+      </button>
+    </buttons>
+
+    <bookmark name="bookmarks"/>
+    <columnsControls name="columns_controls"/>
+    <filters name="listing_filters"/>
+
+    <!-- Mass Delete wired to selections -->
+    <massaction name="listing_massaction">
+      <argument name="data" xsi:type="array">
+        <item name="config" xsi:type="array">
+          <item name="selectProvider" xsi:type="string">
+            merlin_blocked_ip_listing.merlin_blocked_ip_listing.listing_columns.ids
+          </item>
+        </item>
+      </argument>
+      <action name="delete">
+        <settings>
+          <label translate="true">Delete</label>
+          <type>delete</type>
+          <url path="merlin_id/block/massDelete"/>
+          <confirm>
+            <message translate="true">Delete selected IP(s)?</message>
+          </confirm>
+        </settings>
+      </action>
+    </massaction>
+
+    <paging name="listing_paging"/>
+  </listingToolbar>
+
+  <columns name="listing_columns">
+    <selectionsColumn name="ids"/>
+
+    <column name="block_id">
+      <settings>
+        <label>ID</label>
+        <sorting>desc</sorting>
+        <filter>text</filter>
+      </settings>
+    </column>
+    <column name="ip">
+      <settings>
+        <label>IP</label>
+        <filter>text</filter>
+      </settings>
+    </column>
+    <column name="reason">
+      <settings>
+        <label>Reason</label>
+        <filter>text</filter>
+      </settings>
+    </column>
+    <column name="created_at">
+      <settings>
+        <label>Created At (UTC)</label>
+        <dataType>date</dataType>
+        <filter>dateRange</filter>
+      </settings>
+    </column>
+    <column name="expires_at">
+      <settings>
+        <label>Expires At (UTC)</label>
+        <dataType>date</dataType>
+        <filter>dateRange</filter>
+      </settings>
+    </column>
+
+    <!-- Safe actions column: actions defined in config (no <actions> child) -->
+    <column name="actions">
+      <argument name="data" xsi:type="array">
+        <item name="config" xsi:type="array">
+          <item name="component" xsi:type="string">Magento_Ui/js/grid/columns/actions</item>
+          <item name="indexField" xsi:type="string">block_id</item>
+          <item name="sortable" xsi:type="boolean">false</item>
+          <item name="actions" xsi:type="array">
+            <item name="edit" xsi:type="array">
+              <item name="href" xsi:type="url" path="merlin_id/block/edit"/>
+              <item name="label" xsi:type="string" translate="true">Edit</item>
+              <item name="params" xsi:type="array">
+                <item name="block_id" xsi:type="string">${ $.$data.block_id }</item>
+              </item>
             </item>
-            <item name="config" xsi:type="array">
-                <item name="update_url" xsi:type="url" path="mui/index/render"/>
-                <item name="storageConfig" xsi:type="array">
-                    <item name="indexField" xsi:type="string">block_id</item>
-                </item>
+            <item name="delete" xsi:type="array">
+              <item name="href" xsi:type="url" path="merlin_id/block/delete"/>
+              <item name="label" xsi:type="string" translate="true">Delete</item>
+              <item name="confirm" xsi:type="array">
+                <item name="title" xsi:type="string" translate="true">Delete</item>
+                <item name="message" xsi:type="string" translate="true">Delete this IP?</item>
+              </item>
+              <item name="params" xsi:type="array">
+                <item name="block_id" xsi:type="string">${ $.$data.block_id }</item>
+              </item>
             </item>
-        </argument>
-    </dataSource>
-
-    <listingToolbar name="listing_top">
-        <buttons name="listing_buttons">
-            <button name="add">
-                <settings>
-                    <label translate="true">Add Blocked IP</label>
-                    <class>primary</class>
-                    <url path="merlin_id/block/new"/>
-                </settings>
-            </button>
-        </buttons>
-        <bookmark name="bookmarks"/>
-        <columnsControls name="columns_controls"/>
-        <filters name="listing_filters"/>
-        <massaction name="listing_massaction">
-            <action name="delete">
-                <settings>
-                    <label translate="true">Delete</label>
-                    <type>delete</type>
-                    <url path="merlin_id/block/massDelete"/>
-                    <confirm>
-                        <message translate="true">Delete selected IP(s)?</message>
-                    </confirm>
-                </settings>
-            </action>
-        </massaction>
-        <paging name="listing_paging"/>
-    </listingToolbar>
-
-    <columns name="listing_columns">
-        <selectionsColumn name="ids"/>
-        <column name="block_id">
-            <settings>
-                <label translate="true">ID</label>
-                <sorting>desc</sorting>
-                <filter>text</filter>
-            </settings>
-        </column>
-        <column name="ip">
-            <settings>
-                <label translate="true">IP</label>
-                <filter>text</filter>
-            </settings>
-        </column>
-        <column name="reason">
-            <settings>
-                <label translate="true">Reason</label>
-                <filter>text</filter>
-            </settings>
-        </column>
-        <column name="created_at">
-            <settings>
-                <label translate="true">Created At (UTC)</label>
-                <dataType>date</dataType>
-                <filter>dateRange</filter>
-            </settings>
-        </column>
-        <column name="expires_at">
-            <settings>
-                <label translate="true">Expires At (UTC)</label>
-                <dataType>date</dataType>
-                <filter>dateRange</filter>
-            </settings>
-        </column>
-
-        <actionsColumn name="actions" class="Magento\Ui\Component\Listing\Columns\Actions">
-            <settings>
-                <indexField>block_id</indexField>
-                <resizeEnabled>false</resizeEnabled>
-                <resizeDefaultWidth>107</resizeDefaultWidth>
-            </settings>
-            <!-- optional: keep selectionsProvider for consistency -->
-            <selectionsProvider>
-                merlin_blocked_ip_listing.merlin_blocked_ip_listing.listing_columns.ids
-            </selectionsProvider>
-            <actions>
-                <action name="edit">
-                    <settings>
-                        <label translate="true">Edit</label>
-                        <url path="merlin_id/block/edit"/>
-                        <params>
-                            <param name="block_id">block_id</param>
-                        </params>
-                    </settings>
-                </action>
-                <action name="delete">
-                    <settings>
-                        <label translate="true">Delete</label>
-                        <url path="merlin_id/block/delete"/>
-                        <params>
-                            <param name="block_id">block_id</param>
-                        </params>
-                        <confirm>
-                            <message translate="true">Delete this IP?</message>
-                        </confirm>
-                    </settings>
-                </action>
-            </actions>
-        </actionsColumn>
-    </columns>
+          </item>
+        </item>
+      </argument>
+    </column>
+  </columns>
 </listing>

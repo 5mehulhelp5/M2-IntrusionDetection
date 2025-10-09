@@ -99,6 +99,26 @@ class Config
         return (string)($this->get(self::PATH_HP_URL) ?: '/_hp');
     }
 
+    public function blockedTitle(): string  
+    { 
+        return (string)($this->get('general/blocked_title') ?: __('Access blocked')); 
+    }
+
+    public function blockedMessage(): string
+    { 
+        return (string)($this->get('general/blocked_message') ?: __('Your request was blocked by our security system.'));
+    }
+
+    public function contactEmail(): string  
+    { 
+        return (string)($this->get('general/contact_email') ?: ''); 
+    }
+
+    public function contactPhone(): string  
+    { 
+        return (string)($this->get('general/contact_phone') ?: ''); 
+    }
+
     /* ------------------------------
      * Whitelist / Ignore IPs
      * ------------------------------ */

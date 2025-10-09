@@ -5,4 +5,3 @@
     <observer name="merlin_ids_predispatch_logger" instance="Merlin\IntrusionDetection\Observer\PredispatchLogger"/>
   </event>
 </config>
-

@@ -1,0 +1,31 @@
+<?php /** @var $block \Merlin\IntrusionDetection\Block\Blocked */ ?>
+
+<div class="merlin-ids-blocked" style="max-width:760px;margin:40px auto;padding:24px;border:1px solid #eee;border-radius:8px;">
+  <h1 style="margin-top:0;"><?php echo $block->escapeHtml($block->getTitle()); ?></h1>
+  <div class="message" style="margin:12px 0 18px;">
+    <?php /* blocked_message allows HTML by design */ ?>
+    <?php /* phpcs:ignore Magento2.Security.XssTemplate */ ?>
+    <?php echo $block->getMessageHtml(); ?>
+  </div>
+
+  <?php if ($block->getContactEmail() || $block->getContactPhone()): ?>
+    <div class="contact" style="opacity:.85">
+      <strong><?php echo $block->escapeHtml(__('Need help?')); ?></strong><br/>
+      <?php if ($block->getContactEmail()): ?>
+        <?php $email = $block->escapeHtmlAttr($block->getContactEmail()); ?>
+        <div><?php echo $block->escapeHtml(__('Email')); ?>:
+          <a href="mailto:<?php echo $email; ?>"><?php echo $email; ?></a>
+        </div>
+      <?php endif; ?>
+      <?php if ($block->getContactPhone()): ?>
+        <div><?php echo $block->escapeHtml(__('Phone')); ?>:
+          <?php echo $block->escapeHtml($block->getContactPhone()); ?>
+        </div>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
+
+  <p style="margin-top:18px;color:#888;font-size:12px;">
+    <?php echo $block->escapeHtml(__('If you believe this is an error, please contact us.')); ?>
+  </p>
+</div>

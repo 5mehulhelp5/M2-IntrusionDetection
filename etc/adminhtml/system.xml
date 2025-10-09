@@ -4,7 +4,6 @@
   <system>
     <section id="merlin_intrusion" translate="label" type="text" sortOrder="950" showInDefault="1" showInWebsite="1" showInStore="1">
       <label>Merlin Intrusion Detection</label>
-      <!-- Keep the tab you had when it worked -->
       <tab>security</tab>
       <resource>Merlin_IntrusionDetection::config</resource>
 
@@ -18,12 +17,34 @@
 
         <field id="mode" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Action Mode</label>
-          <!-- your working source model (we add the class below) -->
           <source_model>Merlin\IntrusionDetection\Model\Config\Source\Mode</source_model>
           <comment>Detect = log only; Block = 403 + auto-block on high/critical.</comment>
         </field>
+        
+        <!-- Blockpage / Contact Info -->
+        <field id="blocked_title" translate="label" type="text" sortOrder="40"
+          showInDefault="1" showInWebsite="1" showInStore="1">
+          <label>Blocked Page Title</label>
+          <comment>Shown as the page title for blocked visitors.</comment>
+        </field>
 
-        <!-- NEW: Whitelist/Ignore IPs -->
+        <field id="blocked_message" translate="label" type="textarea" sortOrder="50"
+         showInDefault="1" showInWebsite="1" showInStore="1">
+         <label>Blocked Message (HTML allowed)</label>
+         <comment>Explain why they were blocked and how to get help.</comment>
+        </field>
+
+        <field id="contact_email" translate="label" type="text" sortOrder="60"
+         showInDefault="1" showInWebsite="1" showInStore="1">
+         <label>Contact Email</label>
+        </field>
+
+        <field id="contact_phone" translate="label" type="text" sortOrder="70"
+         showInDefault="1" showInWebsite="1" showInStore="1">
+         <label>Contact Phone</label>
+        </field>
+
+        <!-- Whitelist/Ignore IPs -->
         <field id="whitelist" translate="label" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Whitelist (comma or newline separated IPs)</label>
           <comment>Requests from these IPs bypass detectors and blocks.</comment>

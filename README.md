@@ -1,6 +1,10 @@
 An extensible, defense‑in‑depth Intrusion Detection & Prevention module for Magento 2.
+
 #v2.2.4
+
+
 New: Added a nice clean block page with contact details rather than the one line error message "An error has happened during application run. See exception log for details."
+
 
 #v2.2.3
 

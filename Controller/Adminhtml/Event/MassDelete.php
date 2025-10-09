@@ -1,38 +1,48 @@
 <?php
 declare(strict_types=1);
 
-namespace Merlin\IntrusionDetection\Controller\Adminhtml\Block;
+namespace Merlin\IntrusionDetection\Controller\Adminhtml\Event;
 
 use Magento\Backend\App\Action;
-use Magento\Framework\App\ResourceConnection;
+use Magento\Ui\Component\MassAction\Filter;
+use Merlin\IntrusionDetection\Model\ResourceModel\EventLog\CollectionFactory;
 
 class MassDelete extends Action
 {
-    public const ADMIN_RESOURCE = 'Merlin_IntrusionDetection::blocks';
+    public const ADMIN_RESOURCE = 'Merlin_IntrusionDetection::events';
 
-    /** @var ResourceConnection */
-    private $rc;
+    /** @var Filter */
+    private $filter;
+    /** @var CollectionFactory */
+    private $collectionFactory;
 
     public function __construct(
         Action\Context $context,
-        ResourceConnection $rc
+        Filter $filter,
+        CollectionFactory $collectionFactory
     ) {
         parent::__construct($context);
-        $this->rc = $rc;
+        $this->filter = $filter;
+        $this->collectionFactory = $collectionFactory;
     }
 
     public function execute()
     {
-        $ids = (array)($this->getRequest()->getParam('selected') ?? []);
-        $table = $this->rc->getTableName('merlin_blocked_ip');
+        $resultRedirect = $this->resultRedirectFactory->create();
 
-        if ($ids) {
-            $this->rc->getConnection()->delete($table, ['block_id IN (?)' => $ids]);
-            $this->messageManager->addSuccessMessage(__('Deleted %1 record(s).', count($ids)));
+        $collection = $this->filter->getCollection($this->collectionFactory->create());
+        $count = 0;
+        foreach ($collection as $item) {
+            $item->delete();
+            $count++;
+        }
+
+        if ($count) {
+            $this->messageManager->addSuccessMessage(__('Deleted %1 event(s).', $count));
         } else {
             $this->messageManager->addNoticeMessage(__('No records selected.'));
         }
 
-        return $this->resultRedirectFactory->create()->setPath('*/*/');
+        return $resultRedirect->setPath('*/*/');
     }
 }

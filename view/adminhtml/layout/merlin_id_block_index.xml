@@ -1,10 +1,21 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-  <update handle="merlin_blocked_ip_listing_data_source"/>
   <body>
+    <!-- Ensure the listing renders -->
     <referenceContainer name="content">
       <uiComponent name="merlin_blocked_ip_listing"/>
+    </referenceContainer>
+
+    <!-- Add button in the header actions area -->
+    <referenceContainer name="page.actions">
+      <block class="Magento\Backend\Block\Widget\Button" name="merlin_id_block_add">
+        <arguments>
+          <argument name="label" xsi:type="string" translate="true">Add Blocked IP</argument>
+          <argument name="class" xsi:type="string">primary</argument>
+          <argument name="button_url" xsi:type="url" path="merlin_id/block/new"/>
+        </arguments>
+      </block>
     </referenceContainer>
   </body>
 </page>

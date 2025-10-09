@@ -2,13 +2,9 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
-  <!-- Front controller plugin -->
-  <type name="Magento\Framework\App\FrontControllerInterface">
-    <plugin name="merlin_intrusion_guard" type="Merlin\IntrusionDetection\Plugin\IntrusionGuard" sortOrder="10"/>
-  </type>
 
   <!-- Inject detectors -->
-  <type name="Merlin\IntrusionDetection\Plugin\FrontController\IntrusionGuard">
+  <type name="Merlin\IntrusionDetection\Plugin\IntrusionGuard">
     <arguments>
       <argument name="detectors" xsi:type="array">
         <item name="ipblock" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\IpBlockDetector</item>

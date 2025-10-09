@@ -30,4 +30,3 @@ class RateLimitDetector implements DetectorInterface {
         return [false,'low',null];
     }
 }
-

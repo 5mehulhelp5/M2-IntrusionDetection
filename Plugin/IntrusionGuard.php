@@ -12,164 +12,152 @@ use Merlin\IntrusionDetection\Api\BlockServiceInterface;
 use Merlin\IntrusionDetection\Model\Config;
 use Merlin\IntrusionDetection\Model\EventLogger;
 
-/**
- * Front controller plugin that runs Merlin IDS detectors on every frontend request.
- *
- * Notes:
- * - Skips when module disabled.
- * - Skips adminhtml area / admin frontName routes.
- * - Skips whitelisted IPs (single IP or CIDR ranges) via Config::isWhitelisted().
- * - Runs configured detectors and logs hits.
- * - If mode != "detect" (i.e., "block") and any hit is high/critical, blocks IP and returns 403.
- * - Handles optional Honeypot URL if enabled in config.
- */
 class IntrusionGuard
 {
-    /** @var Config */
-    private $config;
-    /** @var EventLogger */
-    private $logger;
-    /** @var BlockServiceInterface */
-    private $blockService;
-    /** @var State */
-    private $appState;
-    /** @var BackendHelper */
-    private $backendHelper;
-    /** @var ResponseInterface */
-    private $response;
-    /**
-     * @var array Detectors; each must implement:
-     *            - inspect(RequestInterface $request): array [bool $isHit, string $severity('low'..'critical'), string|null $details]
-     *            - getName(): string
-     */
-    private $detectors;
-
     public function __construct(
-        Config $config,
-        EventLogger $logger,
-        BlockServiceInterface $blockService,
-        State $appState,
-        BackendHelper $backendHelper,
-        ResponseInterface $response,
-        array $detectors = []
-    ) {
-        $this->config        = $config;
-        $this->logger        = $logger;
-        $this->blockService  = $blockService;
-        $this->appState      = $appState;
-        $this->backendHelper = $backendHelper;
-        $this->response      = $response;
-        $this->detectors     = $detectors;
-    }
+        private readonly Config $config,
+        private readonly EventLogger $logger,
+        private readonly BlockServiceInterface $blockService,
+        private readonly State $appState,
+        private readonly BackendHelper $backendHelper,
+        private readonly ResponseInterface $response,
+        private readonly array $detectors = []
+    ) {}
 
-    /**
-     * aroundDispatch: run before the FrontController processes the request.
-     */
     public function aroundDispatch(
         FrontControllerInterface $subject,
         callable $proceed,
         RequestInterface $request
     ) {
-        // 0) Feature switch
         if (!$this->config->isEnabled()) {
             return $proceed($request);
         }
 
-        // 1) Skip adminhtml area (compile-safe; area may not be set yet)
-        try {
-            if ($this->appState->getAreaCode() === 'adminhtml') {
-                return $proceed($request);
-            }
-        } catch (\Throwable $e) {
-            // ignore; area not set at this point on some entry paths
-        }
-
-        // 2) Skip admin route by frontName (e.g., /admin_abcdef/...)
-        $adminFrontName = trim((string) $this->backendHelper->getAreaFrontName(), '/');
-        $uri = '/' . ltrim((string)($request->getRequestUri() ?: $request->getPathInfo() ?: ''), '/');
-        if ($adminFrontName !== '' && strpos(ltrim($uri, '/'), $adminFrontName) === 0) {
+        // Never touch admin
+        try { if ($this->appState->getAreaCode() === 'adminhtml') { return $proceed($request); } } catch (\Throwable $e) {}
+        $adminFront = trim((string)$this->backendHelper->getAreaFrontName(), '/');
+        $uri = '/' . ltrim((string)($request->getRequestUri() ?? $request->getPathInfo() ?? ''), '/');
+        if ($adminFront !== '' && str_starts_with(ltrim($uri, '/'), $adminFront)) {
             return $proceed($request);
         }
 
-        // 3) Gather request context
-        $ip   = (string)($request->getServer('REMOTE_ADDR') ?? '');
-        $path = (string)($request->getRequestUri() ?? $request->getPathInfo() ?? '/');
+        // --- proxy-aware client IPs ---
+        $ips = $this->getClientIpCandidates($request); // ordered by trust/likelihood
+        $path = (string)($request->getRequestUri() ?? $request->getPathInfo());
         $ua   = (string)($request->getServer('HTTP_USER_AGENT') ?? '');
 
-        // 4) Whitelist: short-circuit entirely if IP should be ignored
-        if ($ip !== '' && $this->config->isWhitelisted($ip)) {
-            return $proceed($request);
+        // Whitelist check (any candidate)
+        $wl = $this->config->whitelist();
+        if ($wl !== '') {
+            $list = preg_split('/[\s,]+/', $wl, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            foreach ($ips as $ip) {
+                if (in_array($ip, $list, true)) {
+                    return $proceed($request);
+                }
+            }
         }
 
+// Logging
+$this->logger->log('Debug', 'low', ($ips[0] ?? ''), $path, $ua,
+    sprintf('Candidates=%s; WL=%s',
+        implode(',', $ips),
+        $this->config->whitelist()
+    )
+);
+
+foreach ($ips as $ipCandidate) {
+    $blocked = $this->blockService->isBlocked($ipCandidate);
+    // log each candidate’s decision
+    $this->logger->log('Debug', 'low', $ipCandidate, $path, $ua,
+        'isBlocked=' . ($blocked ? '1' : '0')
+    );
+    if ($blocked) {
+        $this->logger->log('IpBlockDetector', 'high', $ipCandidate, $path, $ua, 'Blocked IP');
+        $this->response->setHttpResponseCode(403);
+        if (method_exists($this->response, 'setBody')) {
+            $this->response->setBody('Forbidden');
+        } elseif (method_exists($this->response, 'setContent')) {
+            $this->response->setContent('Forbidden');
+        }
+        return $this->response;
+    }
+}
+
+        // Hard block (any candidate that is blocked)
+        foreach ($ips as $ip) {
+            if ($this->blockService->isBlocked($ip)) {
+                // Log once using the first blocked match
+                $this->logger->log('IpBlockDetector', 'high', $ip, $path, $ua, 'Blocked IP');
+                $this->response->setHttpResponseCode(403);
+                if (method_exists($this->response, 'setBody')) { $this->response->setBody('Forbidden'); }
+                elseif (method_exists($this->response, 'setContent')) { $this->response->setContent('Forbidden'); }
+                return $this->response;
+            }
+        }
+
+        // Detectors (unchanged)
         $hits = [];
-
-        // 5) Honeypot (optional, quick win)
-        if ($this->config->hpEnabled()) {
-            $honeypot = rtrim($this->config->hpUrl() ?: '/_hp', '/');
-            $reqPath  = rtrim(parse_url($path, PHP_URL_PATH) ?: '', '/');
-            if ($honeypot !== '' && $reqPath === $honeypot) {
-                $this->logger->log('HoneypotDetector', 'high', $ip, $path, $ua, 'Honeypot tripped');
-                $hits[] = ['HoneypotDetector', 'high'];
-            }
-        }
-
-        // 6) Run detectors (duck-typed; see class phpdoc)
         foreach ($this->detectors as $detector) {
-            // support either inspect(RequestInterface) or inspect($request)
             try {
-                $res = $detector->inspect($request);
-            } catch (\ArgumentCountError $e) {
-                $res = $detector->inspect();
-            } catch (\Throwable $e) {
-                // detector failure should never take down the request; log and continue
-                $this->logger->log(
-                    method_exists($detector, 'getName') ? $detector->getName() : get_class($detector),
-                    'low',
-                    $ip,
-                    $path,
-                    $ua,
-                    'Detector error: ' . $e->getMessage()
-                );
-                continue;
-            }
-
-            $isHit = (bool)($res[0] ?? false);
-            $sev   = (string)($res[1] ?? 'low');
-            $det   = $res[2] ?? null;
-
-            if ($isHit) {
-                $detName = method_exists($detector, 'getName') ? (string)$detector->getName() : (new \ReflectionClass($detector))->getShortName();
-                $this->logger->log($detName, $sev, $ip, $path, $ua, is_string($det) ? $det : null);
-                $hits[] = [$detName, $sev];
-            }
+                $res  = $detector->inspect($request);
+                $hit  = (bool)($res[0] ?? false);
+                $sev  = (string)($res[1] ?? 'low');
+                $det  = $res[2] ?? null;
+                if ($hit) {
+                    $this->logger->log($detector->getName(), $sev, $ips[0] ?? '', $path, $ua, is_string($det) ? $det : null);
+                    $hits[] = [$detector->getName(), $sev];
+                }
+            } catch (\Throwable $e) {}
         }
 
-        // 7) Enforcement: if not just "detect", block on high/critical and stop
         if ($hits && $this->config->mode() !== 'detect') {
-            foreach ($hits as [$detName, $severity]) {
-                if (in_array($severity, ['high', 'critical'], true)) {
-                    if ($ip !== '') {
-                        // default 60 minutes block; adjust if you have config-driven duration
-                        $this->blockService->block($ip, 'Auto by ' . $detName, 60);
-                    }
+            // auto-block on high/critical using the first candidate ip
+            $ip = $ips[0] ?? '';
+            foreach ($hits as [$detName, $sev]) {
+                if (in_array($sev, ['high', 'critical'], true)) {
+                    if ($ip !== '') { $this->blockService->block($ip, 'Auto block by ' . $detName, 60); }
                     break;
                 }
             }
-
-            // Return a 403 immediately
             $this->response->setHttpResponseCode(403);
-
-            // Write a small body safely (method varies by implementation)
-            if (method_exists($this->response, 'setBody')) {
-                $this->response->setBody('Forbidden');
-            } elseif (method_exists($this->response, 'setContent')) {
-                $this->response->setContent('Forbidden');
-            }
-
+            if (method_exists($this->response, 'setBody')) { $this->response->setBody('Forbidden'); }
+            elseif (method_exists($this->response, 'setContent')) { $this->response->setContent('Forbidden'); }
             return $this->response;
         }
 
-        // 8) No enforcement or no hits => proceed
         return $proceed($request);
+    }
+
+    /**
+     * Returns client IP candidates considering common proxy/CDN headers.
+     * Order: CF-Connecting-IP, X-Real-IP, left-most X-Forwarded-For, REMOTE_ADDR.
+     */
+    private function getClientIpCandidates(RequestInterface $request): array
+    {
+        $candidates = [];
+
+        $add = function (?string $ip) use (&$candidates) {
+            $ip = trim((string)$ip);
+            if ($ip === '') { return; }
+            // strip ports if any (IPv4:port)
+            $ip = preg_replace('/:\d+$/', '', $ip);
+            // normalize IPv6 zone if present
+            $ip = preg_replace('/%\w+$/', '', $ip);
+            if (!in_array($ip, $candidates, true)) {
+                $candidates[] = $ip;
+            }
+        };
+
+        $add($request->getServer('HTTP_CF_CONNECTING_IP')); // Cloudflare
+        $add($request->getServer('HTTP_X_REAL_IP'));        // NGINX/Proxy
+        $xff = (string)($request->getServer('HTTP_X_FORWARDED_FOR') ?? '');
+        if ($xff !== '') {
+            foreach (explode(',', $xff) as $p) {
+                $add($p);
+            }
+        }
+        $add($request->getServer('REMOTE_ADDR'));
+
+        return $candidates;
     }
 }

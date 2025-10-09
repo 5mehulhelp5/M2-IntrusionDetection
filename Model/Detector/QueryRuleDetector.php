@@ -17,4 +17,3 @@ class QueryRuleDetector implements DetectorInterface {
         return [false,'low',null];
     }
 }
-

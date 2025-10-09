@@ -17,4 +17,3 @@ class IpBlockDetector implements DetectorInterface {
         return [false, 'low', null];
     }
 }
-

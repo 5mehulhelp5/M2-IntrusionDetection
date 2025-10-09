@@ -104,6 +104,15 @@ class Config
      * ------------------------------ */
 
     /**
+     * NEW: Raw whitelist string (textarea) — used by IntrusionGuard.
+     * Returns the unprocessed value; entries are expected to be comma/newline separated.
+     */
+    public function whitelist(): string
+    {
+        return (string)($this->get(self::PATH_WHITELIST) ?? '');
+    }
+
+    /**
      * Raw whitelist entries (each entry is either a single IP or CIDR).
      * @return string[]
      */

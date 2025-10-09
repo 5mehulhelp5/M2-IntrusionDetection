@@ -9,6 +9,9 @@ Fixed not blocking ip addresses
 Fixed not removing expired ip's
 
 
+Fixed logging
+
+
 Added whitelist.
 
 #v2.0.0

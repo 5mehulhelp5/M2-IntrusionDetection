@@ -17,7 +17,7 @@ class AdminLoginFailed implements ObserverInterface
         $user = $observer->getEvent()->getUser();
         if ($user && !$observer->getEvent()->getPasswordMatched()) {
             $ip = $_SERVER['REMOTE_ADDR'] ?? '';
-            $this->logger->log('bruteforce_admin', 'high', $ip, '/admin', $_SERVER['HTTP_USER_AGENT'] ?? '', 'Admin login failed');
+            $this->logger->log('bruteforce_admin', 'high', $ip, '/depot-backend', $_SERVER['HTTP_USER_AGENT'] ?? '', 'Admin login failed');
         }
     }
 }

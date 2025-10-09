@@ -19,3 +19,4 @@ class Collection extends SearchResult
         $this->addFilterToMap('created_at', 'main_table.created_at');
     }
 }
+

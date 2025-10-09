@@ -23,6 +23,8 @@ class Delete extends Action
 
     public function execute()
     {
+        $resultRedirect = $this->resultRedirectFactory->create();
+
         $id = (int)$this->getRequest()->getParam('block_id');
         if ($id) {
             $this->rc->getConnection()->delete(
@@ -34,6 +36,6 @@ class Delete extends Action
             $this->messageManager->addErrorMessage(__('Missing ID.'));
         }
 
-        return $this->resultRedirectFactory->create()->setPath('*/*/');
+        return $resultRedirect->setPath('*/*/');
     }
 }

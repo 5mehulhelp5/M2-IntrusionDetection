@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
+
 namespace Merlin\IntrusionDetection\Model;
+
 class EventLogger {
     private $factory; private $resource;
     public function __construct(\Merlin\IntrusionDetection\Model\EventLogFactory $factory, \Merlin\IntrusionDetection\Model\ResourceModel\EventLog $resource){ $this->factory=$factory; $this->resource=$resource; }

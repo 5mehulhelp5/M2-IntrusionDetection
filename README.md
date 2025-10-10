@@ -1,7 +1,12 @@
 An extensible, defense‑in‑depth Intrusion Detection & Prevention module for Magento 2.
+
+
 #2.2.6
+
+
 Add block IP button on Blocked IP's page
- 
+
+
 #v2.2.5
 Fix config.xml
 

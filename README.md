@@ -3,8 +3,7 @@ An extensible, defense‑in‑depth Intrusion Detection & Prevention module for 
 
 #v2.2.6
 
-
-Add block IP button on Blocked IP's page
+Add block IP button on Blocked IP's grid, add delete and mass delete and add a form to add new ip's.
 
 
 #v2.2.5

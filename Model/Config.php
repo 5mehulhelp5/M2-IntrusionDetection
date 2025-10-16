@@ -124,7 +124,7 @@ class Config
      * ------------------------------ */
 
     /**
-     * NEW: Raw whitelist string (textarea) — used by IntrusionGuard.
+     * NEW: Raw whitelist string (textarea) â€” used by IntrusionGuard.
      * Returns the unprocessed value; entries are expected to be comma/newline separated.
      */
     public function whitelist(): string

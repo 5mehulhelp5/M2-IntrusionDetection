@@ -7,41 +7,84 @@
       <item name="provider" xsi:type="string">merlin_blocked_ip_form.merlin_blocked_ip_form_data_source</item>
     </item>
     <item name="label" xsi:type="string" translate="true">Blocked IP</item>
+    <item name="template" xsi:type="string">templates/form/collapsible</item>
   </argument>
 
+  <settings>
+    <namespace>merlin_blocked_ip_form</namespace>
+    <dataScope>data</dataScope>
+    <deps>
+      <dep>merlin_blocked_ip_form.merlin_blocked_ip_form_data_source</dep>
+    </deps>
+    <buttons>
+      <button name="back" class="Merlin\IntrusionDetection\Block\Adminhtml\Block\Edit\BackButton"/>
+      <button name="save" class="Merlin\IntrusionDetection\Block\Adminhtml\Block\Edit\SaveButton"/>
+    </buttons>
+  </settings>
+
   <dataSource name="merlin_blocked_ip_form_data_source">
-    <argument name="dataProvider" xsi:type="configurableObject">
-      <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
-      <argument name="name" xsi:type="string">merlin_blocked_ip_form_data_source</argument>
-      <argument name="primaryFieldName" xsi:type="string">block_id</argument>
-      <argument name="requestFieldName" xsi:type="string">block_id</argument>
-      <argument name="data" xsi:type="array">
-        <item name="config" xsi:type="array">
-          <item name="update_url" xsi:type="url" path="mui/index/render"/>
-        </item>
-      </argument>
+    <argument name="data" xsi:type="array">
+      <item name="js_config" xsi:type="array">
+        <item name="component" xsi:type="string">Magento_Ui/js/form/provider</item>
+      </item>
     </argument>
     <settings>
       <submitUrl path="merlin_id/block/save"/>
     </settings>
+    <dataProvider class="Merlin\IntrusionDetection\Model\BlockedIp\DataProvider"
+                  name="merlin_blocked_ip_form_data_source">
+      <settings>
+        <requestFieldName>block_id</requestFieldName>
+        <primaryFieldName>block_id</primaryFieldName>
+      </settings>
+    </dataProvider>
   </dataSource>
 
-  <buttons>
-    <button name="back"><settings><title translate="true">Back</title><class>back</class><url path="*/*/"/></settings></button>
-    <button name="save"><settings><title translate="true">Save</title><class>action-primary</class><formSubmit>true</formSubmit></settings></button>
-    <button name="delete">
-      <settings>
-        <title translate="true">Delete</title><class>action-secondary</class>
-        <url path="merlin_id/block/delete"><param name="block_id">%block_id</param></url>
-        <confirm><message translate="true">Delete this block?</message></confirm>
-      </settings>
-    </button>
-  </buttons>
+  <fieldset name="general" sortOrder="10">
+    <settings><label translate="true">General</label></settings>
 
-  <fieldset name="general">
-    <field name="block_id" formElement="hidden"><settings><dataType>number</dataType><visible>false</visible></settings></field>
-    <field name="ip" formElement="input"><settings><dataType>text</dataType><label translate="true">IP</label><validation><rule name="required-entry" xsi:type="boolean">true</rule></validation></settings></field>
-    <field name="reason" formElement="input"><settings><dataType>text</dataType><label translate="true">Reason</label></settings></field>
-    <field name="expires_at" formElement="date"><settings><dataType>date</dataType><label translate="true">Expires At (UTC)</label></settings></field>
+    <field name="block_id" formElement="hidden">
+      <settings>
+        <dataType>number</dataType>
+        <dataScope>block_id</dataScope>
+      </settings>
+    </field>
+
+    <field name="ip" formElement="input" sortOrder="10">
+      <settings>
+        <label translate="true">IP Address</label>
+        <dataType>text</dataType>
+        <dataScope>ip</dataScope>
+        <validation>
+          <rule name="required-entry" xsi:type="boolean">true</rule>
+        </validation>
+      </settings>
+    </field>
+
+    <field name="comment" formElement="textarea" sortOrder="20">
+      <settings>
+        <label translate="true">Comment</label>
+        <dataType>text</dataType>
+        <dataScope>comment</dataScope>
+      </settings>
+    </field>
+
+        <field name="expires_at" sortOrder="30">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="component" xsi:type="string">Magento_Ui/js/form/element/date</item>
+                    <item name="template"  xsi:type="string">ui/form/field</item>
+                    <item name="label"     xsi:type="string" translate="true">Expires At (UTC)</item>
+                    <item name="dataType"  xsi:type="string">date</item>
+                    <item name="formElement" xsi:type="string">date</item>
+                    <item name="dataScope" xsi:type="string">expires_at</item>
+                    <item name="options"   xsi:type="array">
+                        <item name="dateFormat" xsi:type="string">dd/MM/y</item>
+                        <item name="showsTime"  xsi:type="boolean">true</item>
+                    </item>
+                </item>
+            </argument>
+        </field>
+
   </fieldset>
 </form>

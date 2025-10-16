@@ -1,0 +1,8 @@
+<!-- Basic actions renderer -->
+<!-- ko foreach: $col.getVisibleActions($row()) -->
+    <a data-bind="
+        text: label,
+        attr: { href: $parent.getActionUrl($data, $parent.getRowIndex($parents[1].$index())) },
+        click: $parent.actionHandler.bind($parent, $data)
+    " class="action-default"></a>
+<!-- /ko -->

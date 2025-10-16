@@ -11,19 +11,19 @@ class Index extends Action
     public const ADMIN_RESOURCE = 'Merlin_IntrusionDetection::blocks';
 
     /** @var PageFactory */
-    private $pageFactory;
+    private $resultPageFactory;
 
     public function __construct(
         Action\Context $context,
-        PageFactory $pageFactory
+        PageFactory $resultPageFactory
     ) {
         parent::__construct($context);
-        $this->pageFactory = $pageFactory;
+        $this->resultPageFactory = $resultPageFactory;
     }
 
     public function execute()
     {
-        $resultPage = $this->pageFactory->create();
+        $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('Merlin_IntrusionDetection::blocks');
         $resultPage->getConfig()->getTitle()->prepend(__('Blocked IPs'));
         return $resultPage;

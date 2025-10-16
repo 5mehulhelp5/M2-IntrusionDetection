@@ -33,15 +33,27 @@ class IntrusionGuard
             return $proceed($request);
         }
 
-        // allow our own route to pass if ever used
-        $route = (string)$request->getRouteName();
-        $front = method_exists($request, 'getFrontName') ? (string)$request->getFrontName() : '';
-        if ($route === 'merlin_ids' || $front === 'merlin-ids') {
-            return $proceed($request);
-        }
+        // --- Always allow our own route + static/media assets to pass ---
+           $route    = (string)$request->getRouteName();
+           $front    = method_exists($request, 'getFrontName') ? (string)$request->getFrontName() : '';
+           $pathInfo = '/' . ltrim((string)($request->getPathInfo() ?? ''), '/');
+           $script   = (string)($request->getServer('SCRIPT_NAME') ?? ''); // e.g. /static.php
 
+if (
+    $route === 'merlin_ids' ||
+    $front === 'merlin-ids' ||
+    preg_match('#^(?:/)?(static|media)/#i', ltrim($pathInfo, '/')) ||
+    $pathInfo === '/static.php' ||
+    str_ends_with($script, '/static.php')
+) {
+    return $proceed($request);
+}
         // Never touch admin
-        try { if ($this->appState->getAreaCode() === 'adminhtml') { return $proceed($request); } } catch (\Throwable $e) {}
+        try {
+            if ($this->appState->getAreaCode() === 'adminhtml') {
+                return $proceed($request);
+            }
+        } catch (\Throwable $e) {}
         $adminFront = trim((string)$this->backendHelper->getAreaFrontName(), '/');
         $uri = '/' . ltrim((string)($request->getRequestUri() ?? $request->getPathInfo() ?? ''), '/');
         if ($adminFront !== '' && str_starts_with(ltrim($uri, '/'), $adminFront)) {
@@ -65,11 +77,16 @@ class IntrusionGuard
         }
 
         // debug candidates
-        $this->logger->log('Debug', 'low', ($ips[0] ?? ''), $path, $ua,
+        $this->logger->log(
+            'Debug',
+            'low',
+            ($ips[0] ?? ''),
+            $path,
+            $ua,
             sprintf('Candidates=%s; WL=%s', implode(',', $ips), $wl)
         );
 
-        // **Hard block**: short-circuit with a pre-rendered 403 HTML body
+        // Hard block: return pre-rendered 403 HTML (no layout/blocks)
         foreach ($ips as $ipCandidate) {
             $blocked = $this->blockService->isBlocked($ipCandidate);
             $this->logger->log('Debug', 'low', $ipCandidate, $path, $ua, 'isBlocked=' . ($blocked ? '1' : '0'));
@@ -79,7 +96,7 @@ class IntrusionGuard
             }
         }
 
-        // detectors (unchanged)
+        // detectors
         $hits = [];
         foreach ($this->detectors as $detector) {
             try {
@@ -88,7 +105,14 @@ class IntrusionGuard
                 $sev = (string)($res[1] ?? 'low');
                 $det = $res[2] ?? null;
                 if ($hit) {
-                    $this->logger->log($detector->getName(), $sev, $ips[0] ?? '', $path, $ua, is_string($det) ? $det : null);
+                    $this->logger->log(
+                        $detector->getName(),
+                        $sev,
+                        $ips[0] ?? '',
+                        $path,
+                        $ua,
+                        is_string($det) ? $det : null
+                    );
                     $hits[] = [$detector->getName(), $sev];
                 }
             } catch (\Throwable $e) {}
@@ -98,7 +122,9 @@ class IntrusionGuard
             $ip = $ips[0] ?? '';
             foreach ($hits as [$detName, $sev]) {
                 if (in_array($sev, ['high', 'critical'], true)) {
-                    if ($ip !== '') { $this->blockService->block($ip, 'Auto block by ' . $detName, 60); }
+                    if ($ip !== '') {
+                        $this->blockService->block($ip, 'Auto block by ' . $detName, 60);
+                    }
                     break;
                 }
             }
@@ -112,23 +138,23 @@ class IntrusionGuard
      * Build a minimal branded HTML and write it to the Response with HTTP 403.
      * No layout/blocks used -> avoids rendering crashes from within the plugin.
      */
-private function renderBlockedResponse(): \Magento\Framework\App\ResponseInterface
-{
-    $title   = htmlspecialchars($this->config->blockedTitle() ?: 'Access blocked', ENT_QUOTES, 'UTF-8');
-    // blockedMessage allows HTML on purpose
-    $message = $this->config->blockedMessage();
-    $email   = htmlspecialchars($this->config->contactEmail() ?: '', ENT_QUOTES, 'UTF-8');
-    $phone   = htmlspecialchars($this->config->contactPhone() ?: '', ENT_QUOTES, 'UTF-8');
+    private function renderBlockedResponse(): ResponseInterface
+    {
+        $title   = htmlspecialchars($this->config->blockedTitle() ?: 'Access blocked', ENT_QUOTES, 'UTF-8');
+        // blockedMessage allows HTML on purpose
+        $message = $this->config->blockedMessage();
+        $email   = htmlspecialchars($this->config->contactEmail() ?: '', ENT_QUOTES, 'UTF-8');
+        $phone   = htmlspecialchars($this->config->contactPhone() ?: '', ENT_QUOTES, 'UTF-8');
 
-    $contactHtml = '';
-    if ($email || $phone) {
-        $contactHtml .= '<div style="opacity:.85"><strong>Need help?</strong><br/>';
-        if ($email) { $contactHtml .= 'Email: <a href="mailto:' . $email . '">' . $email . '</a><br/>'; }
-        if ($phone) { $contactHtml .= 'Phone: ' . $phone . '<br/>'; }
-        $contactHtml .= '</div>';
-    }
+        $contactHtml = '';
+        if ($email || $phone) {
+            $contactHtml .= '<div style="opacity:.85"><strong>Need help?</strong><br/>';
+            if ($email) { $contactHtml .= 'Email: <a href="mailto:' . $email . '">' . $email . '</a><br/>'; }
+            if ($phone) { $contactHtml .= 'Phone: ' . $phone . '<br/>'; }
+            $contactHtml .= '</div>';
+        }
 
-    $html = <<<HTML
+        $html = <<<HTML
 <!doctype html>
 <html lang="en">
 <head>
@@ -147,25 +173,27 @@ private function renderBlockedResponse(): \Magento\Framework\App\ResponseInterfa
 </html>
 HTML;
 
-    // --- IMPORTANT: headers FPC expects / cache busting ---
-    $this->response->setHttpResponseCode(403);
-    $this->response->setHeader('Content-Type', 'text/html; charset=UTF-8', true);
-    // Provide a tags header so Kernel::process() doesn't crash
-    $this->response->setHeader('X-Magento-Tags', 'merlin_ids_blocked', true);
-    // Ensure the 403 page is never cached
-    $this->response->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0', true);
-    $this->response->setHeader('Pragma', 'no-cache', true);
-    $this->response->setHeader('Expires', 'Thu, 01 Jan 1970 00:00:00 GMT', true);
+        // Headers FPC expects + no-cache
+        $this->response->setHttpResponseCode(403);
+        $this->response->setHeader('Content-Type', 'text/html; charset=UTF-8', true);
+        $this->response->setHeader('X-Magento-Tags', 'merlin_ids_blocked', true);
+        $this->response->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0', true);
+        $this->response->setHeader('Pragma', 'no-cache', true);
+        $this->response->setHeader('Expires', 'Thu, 01 Jan 1970 00:00:00 GMT', true);
 
-    if (method_exists($this->response, 'setBody')) {
-        $this->response->setBody($html);
-    } elseif (method_exists($this->response, 'setContent')) {
-        $this->response->setContent($html);
+        if (method_exists($this->response, 'setBody')) {
+            $this->response->setBody($html);
+        } elseif (method_exists($this->response, 'setContent')) {
+            $this->response->setContent($html);
+        }
+
+        return $this->response;
     }
 
-    return $this->response;
-}
-
+    /**
+     * Returns client IP candidates considering common proxy/CDN headers.
+     * Order: CF-Connecting-IP, X-Real-IP, left-most X-Forwarded-For, REMOTE_ADDR.
+     */
     private function getClientIpCandidates(RequestInterface $request): array
     {
         $candidates = [];

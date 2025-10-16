@@ -19,17 +19,17 @@
   </type>
 
  <!-- Map Datasource -->
- <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
-        <arguments>
-            <argument name="collections" xsi:type="array">
-                <item name="merlin_intrusion_event_listing_data_source"
-                      xsi:type="string">Merlin\IntrusionDetection\Model\ResourceModel\EventLog\Grid\Collection</item>
+<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+    <arguments>
+        <argument name="collections" xsi:type="array">
+            <item name="merlin_intrusion_event_listing_data_source"
+                  xsi:type="string">Merlin\IntrusionDetection\Model\ResourceModel\EventLog\Grid\Collection</item>
 
-                <item name="merlin_blocked_ip_listing_data_source"
-                      xsi:type="string">Merlin\IntrusionDetection\Model\ResourceModel\BlockedIp\Grid\Collection</item>
-            </argument>
-        </arguments>
-    </type>
+            <item name="merlin_blocked_ip_listing_data_source"
+                  xsi:type="string">Merlin\IntrusionDetection\Model\ResourceModel\BlockedIp\Grid\Collection</item>
+        </argument>
+    </arguments>
+</type>
 
   <!-- Logger wiring -->
   <type name="Merlin\IntrusionDetection\Logger\IdsLogger">

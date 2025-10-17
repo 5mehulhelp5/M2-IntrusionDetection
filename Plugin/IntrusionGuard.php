@@ -34,29 +34,40 @@ class IntrusionGuard
         }
 
         // --- Always allow our own route + static/media assets to pass ---
-           $route    = (string)$request->getRouteName();
-           $front    = method_exists($request, 'getFrontName') ? (string)$request->getFrontName() : '';
-           $pathInfo = '/' . ltrim((string)($request->getPathInfo() ?? ''), '/');
-           $script   = (string)($request->getServer('SCRIPT_NAME') ?? ''); // e.g. /static.php
+        $route    = (string)$request->getRouteName();
+        $front    = method_exists($request, 'getFrontName') ? (string)$request->getFrontName() : '';
+        $pathInfo = '/' . ltrim((string)($request->getPathInfo() ?? ''), '/');
+        $script   = (string)($request->getServer('SCRIPT_NAME') ?? ''); // e.g. /static.php
 
-if (
-    $route === 'merlin_ids' ||
-    $front === 'merlin-ids' ||
-    preg_match('#^(?:/)?(static|media)/#i', ltrim($pathInfo, '/')) ||
-    $pathInfo === '/static.php' ||
-    str_ends_with($script, '/static.php')
-) {
-    return $proceed($request);
-}
+        if (
+            $route === 'merlin_ids' ||
+            $front === 'merlin-ids' ||
+            preg_match('#^(?:/)?(static|media)/#i', ltrim($pathInfo, '/')) ||
+            $pathInfo === '/static.php' ||
+            str_ends_with($script, '/static.php')
+        ) {
+            return $proceed($request);
+        }
+
         // Never touch admin
         try {
             if ($this->appState->getAreaCode() === 'adminhtml') {
                 return $proceed($request);
             }
         } catch (\Throwable $e) {}
+
         $adminFront = trim((string)$this->backendHelper->getAreaFrontName(), '/');
         $uri = '/' . ltrim((string)($request->getRequestUri() ?? $request->getPathInfo() ?? ''), '/');
         if ($adminFront !== '' && str_starts_with(ltrim($uri, '/'), $adminFront)) {
+            return $proceed($request);
+        }
+
+        // --- 3DS / challenge bypass ---
+        // If this looks like a 3DS challenge (path or params or referrer), skip IDS
+        if ($this->isExcludedPath($request) || $this->looksLike3ds($request)) {
+            // use existing logger shape: (name, severity, ip, path, ua, message)
+            $ua = (string)($request->getServer('HTTP_USER_AGENT') ?? '');
+            $this->logger->log('IntrusionGuard', 'low', '', $pathInfo, $ua, 'Bypassing IDS for 3DS/challenge path');
             return $proceed($request);
         }
 
@@ -212,5 +223,48 @@ HTML;
         $add($request->getServer('REMOTE_ADDR'));
 
         return $candidates;
+    }
+
+    /**
+     * Quick path-level exclusions for challenge endpoints.
+     */
+    private function isExcludedPath(RequestInterface $request): bool
+    {
+        $pathInfo = '/' . ltrim((string)($request->getPathInfo() ?? ''), '/');
+        $exclusions = [
+            '/elavon/pi/challengeLoader',
+            '/opayo/pi/challengeLoader',
+            '/sagepay/pi/challengeLoader',
+        ];
+        foreach ($exclusions as $p) {
+            if (str_starts_with(strtolower($pathInfo), strtolower($p))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Heuristic that detects 3DS challenge requests by parameter names or referrer.
+     */
+    private function looksLike3ds(RequestInterface $request): bool
+    {
+        // check params commonly present for 3DS v2 challenges
+        $params = array_change_key_case($request->getParams(), CASE_LOWER);
+        $threeDsParams = ['challenge-creq','creq','threedsservertransid','acstransid','messagetype','messageversion'];
+
+        foreach ($threeDsParams as $k) {
+            if (array_key_exists(strtolower($k), $params)) {
+                return true;
+            }
+        }
+
+        // check referrer for known ACS / payment vendor hosts
+        $ref = (string)($request->getServer('HTTP_REFERER') ?? '');
+        if ($ref !== '' && preg_match('#(?:^|//)[^/]*\.(sagepay\.com|opayo\.eu|opayo\.co\.uk|elavon\.com|arcot\.com|cardinalcommerce\.com)(/|$)#i', $ref)) {
+            return true;
+        }
+
+        return false;
     }
 }

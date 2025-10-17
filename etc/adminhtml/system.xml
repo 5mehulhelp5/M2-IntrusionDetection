@@ -2,7 +2,8 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
   <system>
-    <section id="merlin_intrusion" translate="label" type="text" sortOrder="950" showInDefault="1" showInWebsite="1" showInStore="1">
+    <section id="merlin_intrusion" translate="label" type="text"
+             sortOrder="950" showInDefault="1" showInWebsite="1" showInStore="1">
       <label>Merlin Intrusion Detection</label>
       <tab>security</tab>
       <resource>Merlin_IntrusionDetection::config</resource>
@@ -10,15 +11,18 @@
       <!-- ===========================
            GENERAL SETTINGS
       ============================ -->
-      <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+      <group id="general" translate="label" sortOrder="10"
+             showInDefault="1" showInWebsite="1" showInStore="1">
         <label>General</label>
 
-        <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="enabled" translate="label" type="select" sortOrder="10"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Enabled</label>
           <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
         </field>
 
-        <field id="mode" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="mode" translate="label" type="select" sortOrder="20"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Action Mode</label>
           <source_model>Merlin\IntrusionDetection\Model\Config\Source\Mode</source_model>
           <comment>Detect = log only; Block = 403 + auto-block on high/critical.</comment>
@@ -32,12 +36,12 @@
         </field>
 
         <!-- NEW: Excluded Paths -->
-        <field id="excluded_paths" translate="label comment" type="textarea" sortOrder="35"
+        <field id="excluded_paths" translate="label,comment" type="textarea" sortOrder="35"
                showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Excluded Paths (comma or newline separated)</label>
           <comment><![CDATA[
             Requests whose <strong>path starts with</strong> any of these values will skip IDS inspection.<br/>
-            Example:<br/>
+            Examples:<br/>
             <code>/elavon/pi/challengeLoader</code><br/>
             <code>/amgdprcookie/cookie/allow</code><br/>
             <code>/amgdprcookie/cookie/status</code>
@@ -71,17 +75,24 @@
       <!-- ===========================
            RATE LIMIT SETTINGS
       ============================ -->
-      <group id="ratelimit" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+      <group id="ratelimit" translate="label" sortOrder="20"
+             showInDefault="1" showInWebsite="1" showInStore="1">
         <label>Rate Limiting</label>
-        <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+
+        <field id="enabled" translate="label" type="select" sortOrder="10"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Enable</label>
           <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
         </field>
-        <field id="window_seconds" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+
+        <field id="window_seconds" translate="label" type="text" sortOrder="20"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Window (seconds)</label>
           <validate>validate-number</validate>
         </field>
-        <field id="max_requests" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+
+        <field id="max_requests" translate="label" type="text" sortOrder="30"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Max Requests per Window per IP</label>
           <validate>validate-number</validate>
         </field>
@@ -90,13 +101,18 @@
       <!-- ===========================
            HONEYPOT SETTINGS
       ============================ -->
-      <group id="honeypot" translate="label" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+      <group id="honeypot" translate="label" sortOrder="30"
+             showInDefault="1" showInWebsite="1" showInStore="1">
         <label>Honeypot</label>
-        <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+
+        <field id="enabled" translate="label" type="select" sortOrder="10"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Enable</label>
           <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
         </field>
-        <field id="url" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+
+        <field id="url" translate="label" type="text" sortOrder="20"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Honeypot URL Path</label>
           <comment>Example: /_hp</comment>
         </field>

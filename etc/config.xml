@@ -6,6 +6,9 @@
         <enabled>1</enabled>
         <mode>detect</mode>
         <log_details>1</log_details>
+        excluded_paths>
+        <![CDATA[/elavon/pi/challengeLoader,/opayo/pi/challengeLoader,/sagepay/pi/challengeLoader,/amgdprcookie/cookie/allow,/amgdprcookie/cookie/disallow,/amgdprcookie/cookie/save,/amgdprcookie/cookie/policy,/amgdprcookie/cookie/status]]>
+      </excluded_paths>
       </general>
       <ratelimit>
         <enabled>1</enabled>

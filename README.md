@@ -1,5 +1,7 @@
 An extensible, defense‑in‑depth Intrusion Detection & Prevention module for Magento 2.
 
+#v2.2.7
+Add an editable, comma-separated allow-list of excluded paths in system config (so 3DS and 3rd party extensions, example: Amasty GDPR cookie endpoints won’t be inspected/blocked) 
 
 #v2.2.6
 

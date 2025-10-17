@@ -12,16 +12,17 @@ class Config
     private const BASE_PATH = 'merlin_intrusion/';
 
     /** Paths */
-    private const PATH_ENABLED    = 'general/enabled';
-    private const PATH_MODE       = 'general/mode';
-    private const PATH_WHITELIST  = 'general/whitelist'; // textarea: one IP or CIDR per line
+    private const PATH_ENABLED      = 'general/enabled';
+    private const PATH_MODE         = 'general/mode';
+    private const PATH_WHITELIST    = 'general/whitelist';        // textarea: IPs/CIDRs (comma/newline)
+    private const PATH_EXCLUDED     = 'general/excluded_paths';    // textarea: URL path prefixes (comma/newline)
 
-    private const PATH_RL_ENABLED = 'ratelimit/enabled';
-    private const PATH_RL_WINDOW  = 'ratelimit/window_seconds';
-    private const PATH_RL_MAX     = 'ratelimit/max_requests';
+    private const PATH_RL_ENABLED   = 'ratelimit/enabled';
+    private const PATH_RL_WINDOW    = 'ratelimit/window_seconds';
+    private const PATH_RL_MAX       = 'ratelimit/max_requests';
 
-    private const PATH_HP_ENABLED = 'honeypot/enabled';
-    private const PATH_HP_URL     = 'honeypot/url';
+    private const PATH_HP_ENABLED   = 'honeypot/enabled';
+    private const PATH_HP_URL       = 'honeypot/url';
 
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig
@@ -61,7 +62,7 @@ class Config
     }
 
     /* ------------------------------
-     * Public getters (original)
+     * Public getters (existing)
      * ------------------------------ */
 
     public function isEnabled(): bool
@@ -99,24 +100,24 @@ class Config
         return (string)($this->get(self::PATH_HP_URL) ?: '/_hp');
     }
 
-    public function blockedTitle(): string  
-    { 
-        return (string)($this->get('general/blocked_title') ?: __('Access blocked')); 
+    public function blockedTitle(): string
+    {
+        return (string)($this->get('general/blocked_title') ?: __('Access blocked'));
     }
 
     public function blockedMessage(): string
-    { 
+    {
         return (string)($this->get('general/blocked_message') ?: __('Your request was blocked by our security system.'));
     }
 
-    public function contactEmail(): string  
-    { 
-        return (string)($this->get('general/contact_email') ?: ''); 
+    public function contactEmail(): string
+    {
+        return (string)($this->get('general/contact_email') ?: '');
     }
 
-    public function contactPhone(): string  
-    { 
-        return (string)($this->get('general/contact_phone') ?: ''); 
+    public function contactPhone(): string
+    {
+        return (string)($this->get('general/contact_phone') ?: '');
     }
 
     /* ------------------------------
@@ -124,7 +125,7 @@ class Config
      * ------------------------------ */
 
     /**
-     * NEW: Raw whitelist string (textarea) used by IntrusionGuard.
+     * Raw whitelist string (textarea) used by IntrusionGuard.
      * Returns the unprocessed value; entries are expected to be comma/newline separated.
      */
     public function whitelist(): string
@@ -138,7 +139,20 @@ class Config
      */
     public function whitelistRaw(): array
     {
-        return $this->getLines(self::PATH_WHITELIST);
+        // Accept both newline and comma separation
+        $raw = (string)($this->get(self::PATH_WHITELIST) ?? '');
+        if ($raw === '') {
+            return [];
+        }
+        $parts = preg_split('/[\r\n,]+/', $raw) ?: [];
+        $out = [];
+        foreach ($parts as $p) {
+            $p = trim($p);
+            if ($p !== '') {
+                $out[] = $p;
+            }
+        }
+        return $out;
     }
 
     /**
@@ -154,8 +168,7 @@ class Config
         $isV6 = (bool)filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
         $isV4 = (bool)filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
         if (!$isV4 && !$isV6) {
-            // Not a valid IP: treat as not whitelisted.
-            return false;
+            return false; // Not a valid IP
         }
 
         foreach ($this->whitelistRaw() as $entry) {
@@ -236,5 +249,44 @@ class Config
         // Build mask and compare
         $maskDec = $mask === 0 ? 0 : (~((1 << (32 - $mask)) - 1) & 0xFFFFFFFF);
         return (($ipLong & $maskDec) === ($subnetLong & $maskDec));
+    }
+
+    /* ------------------------------
+     * Excluded path prefixes (NEW)
+     * ------------------------------ */
+
+    /**
+     * Returns normalized, de-duplicated list of path prefixes that should skip IDS.
+     * - Split by commas or newlines
+     * - Trim whitespace
+     * - Ensure a leading '/'
+     * - Lowercase
+     * - Remove empties and duplicates
+     *
+     * @return string[] e.g. ['/elavon/pi/challengeLoader', '/amgdprcookie/cookie/allow']
+     */
+    public function excludedPaths(): array
+    {
+        $raw = (string)($this->get(self::PATH_EXCLUDED) ?? '');
+        if ($raw === '') {
+            return [];
+        }
+
+        $parts = preg_split('/[\r\n,]+/', $raw) ?: [];
+        $norm  = [];
+
+        foreach ($parts as $p) {
+            $p = trim($p);
+            if ($p === '') {
+                continue;
+            }
+            // ensure leading slash and normalize to lowercase
+            $p = '/' . ltrim($p, '/');
+            $p = strtolower($p);
+
+            $norm[$p] = true; // use assoc keys to dedupe
+        }
+
+        return array_keys($norm);
     }
 }

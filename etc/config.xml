@@ -6,9 +6,8 @@
         <enabled>1</enabled>
         <mode>detect</mode>
         <log_details>1</log_details>
-        excluded_paths>
-        <![CDATA[/elavon/pi/challengeLoader,/opayo/pi/challengeLoader,/sagepay/pi/challengeLoader,/amgdprcookie/cookie/allow,/amgdprcookie/cookie/disallow,/amgdprcookie/cookie/save,/amgdprcookie/cookie/policy,/amgdprcookie/cookie/status]]>
-      </excluded_paths>
+        <excluded_paths><![CDATA[/elavon/pi/challengeLoader,/opayo/pi/challengeLoader,/sagepay/pi/challengeLoader,/amgdprcookie/cookie/allow,/amgdprcookie/cookie/disallow,/amgdprcookie/cookie/save,/amgdprcookie/cookie/policy,/amgdprcookie/cookie/status]]>
+        </excluded_paths>
       </general>
       <ratelimit>
         <enabled>1</enabled>
@@ -25,6 +24,24 @@
         <enabled>1</enabled>
         <url>merlin/honeypot</url>
       </honeypot>
+      <geo>
+        <enabled>1</enabled>
+        <db_path></db_path>
+        <window_minutes>15</window_minutes>
+        <ip_window_minutes>30</ip_window_minutes>
+        <min_distance_km>500</min_distance_km>
+        <cache_ttl>3600</cache_ttl>
+        <severity>high</severity>
+        <ignore_cidrs><![CDATA[
+10.0.0.0/8,
+172.16.0.0/12,
+192.168.0.0/16,
+127.0.0.0/8,
+::1/128,
+fc00::/7,
+fe80::/10
+        ]]></ignore_cidrs>
+      </geo>
     </merlin_intrusion>
   </default>
 </config>

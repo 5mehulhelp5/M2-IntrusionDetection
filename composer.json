@@ -5,17 +5,13 @@
   "license": ["OSL-3.0", "AFL-3.0"],
   "require": {
     "php": ">=7.4",
-    "magento/framework": "*"
+    "magento/framework": "*",
+    "geoip2/geoip2": "^2.13"
   },
   "autoload": {
     "files": [
       "registration.php"
     ],
-    {
-  "require": {
-    "geoip2/geoip2": "^2.13"
-  }
-},
     "psr-4": {
       "Merlin\\IntrusionDetection\\": ""
     }

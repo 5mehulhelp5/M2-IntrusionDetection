@@ -23,6 +23,14 @@ class Config
 
     private const PATH_HP_ENABLED   = 'honeypot/enabled';
     private const PATH_HP_URL       = 'honeypot/url';
+    private const PATH_GEO_ENABLED        = 'geo/enabled';
+    private const PATH_GEO_DB_PATH        = 'geo/db_path';
+    private const PATH_GEO_WIN_MIN        = 'geo/window_minutes';
+    private const PATH_GEO_IP_WIN_MIN     = 'geo/ip_window_minutes';
+    private const PATH_GEO_MIN_DIST       = 'geo/min_distance_km';
+    private const PATH_GEO_CACHE_TTL      = 'geo/cache_ttl';
+    private const PATH_GEO_SEVERITY       = 'geo/severity';
+    private const PATH_GEO_IGNORE_CIDRS   = 'geo/ignore_cidrs';
 
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig
@@ -119,6 +127,24 @@ class Config
     {
         return (string)($this->get('general/contact_phone') ?: '');
     }
+     public function geoEnabled(): bool { return (bool)$this->get(self::PATH_GEO_ENABLED); }
+     public function geoDbPath(): string { return (string)($this->get(self::PATH_GEO_DB_PATH) ?: ''); }
+     public function geoWindowMinutes(): int { return max(1, (int)($this->get(self::PATH_GEO_WIN_MIN) ?: 15)); }
+     public function geoIpWindowMinutes(): int { return max(1, (int)($this->get(self::PATH_GEO_IP_WIN_MIN) ?: 30)); }
+     public function geoMinDistanceKm(): int { return max(0, (int)($this->get(self::PATH_GEO_MIN_DIST) ?: 500)); }
+     public function geoCacheTtl(): int { return max(60, (int)($this->get(self::PATH_GEO_CACHE_TTL) ?: 3600)); }
+     public function geoSeverity(): string { return (string)($this->get(self::PATH_GEO_SEVERITY) ?: 'high'); }
+     public function geoIgnoreCidrs(): array {
+    $raw = (string)($this->get(self::PATH_GEO_IGNORE_CIDRS) ?? '');
+    if ($raw === '') return [];
+    $parts = preg_split('/[\r\n,]+/', $raw) ?: [];
+    $out = [];
+    foreach ($parts as $p) {
+        $p = trim($p);
+        if ($p !== '') $out[] = $p;
+    }
+    return $out;
+}
 
     /* ------------------------------
      * Whitelist / Ignore IPs

@@ -5,6 +5,13 @@ An extensible, defense‑in‑depth Intrusion Detection & Prevention module for 
 
 Add GeoIP velocity checks, i.e. sudden country jumps per session/IP.
 
+Notes / Safety
+
+We intentionally don’t block on mobile tower drift by requiring min_distance_km (500km default). Tune per your risk appetite.
+
+
+Private/reserved IPs are ignored; add corporate/VPN egress ranges to Ignore CIDRs. No external calls — everything is local → fast and privacy-safe.
+
 
 #v2.2.7
 

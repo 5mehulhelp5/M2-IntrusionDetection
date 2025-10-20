@@ -1,4 +1,6 @@
 An extensible, defense‑in‑depth Intrusion Detection & Prevention module for Magento 2.
+
+
 #v2.2.8
 
 Add GeoIP velocity checks, i.e. sudden country jumps per session/IP.

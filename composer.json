@@ -11,6 +11,11 @@
     "files": [
       "registration.php"
     ],
+    {
+  "require": {
+    "geoip2/geoip2": "^2.13"
+  }
+},
     "psr-4": {
       "Merlin\\IntrusionDetection\\": ""
     }

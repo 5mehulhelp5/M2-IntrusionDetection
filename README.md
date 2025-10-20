@@ -7,6 +7,7 @@ Add GeoIP velocity checks, i.e. sudden country jumps per session/IP.
 
 
 #v2.2.7
+
 Add an editable, comma-separated allow-list of excluded paths in system config (so 3DS and 3rd party extensions, example: Amasty GDPR cookie endpoints won’t be inspected/blocked) 
 
 #v2.2.6

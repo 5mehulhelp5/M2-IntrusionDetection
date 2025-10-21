@@ -57,7 +57,7 @@ class Resolver
                 'lon'     => (float)($rec->location->longitude ?? 0.0),
             ];
         } catch (\Throwable $e) {
-            // likely private IP or unmapped — just return empty
+            // likely private IP or unmapped just return empty
             return [];
         }
     }

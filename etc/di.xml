@@ -14,6 +14,7 @@
         <item name="path" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\PathAnomalyDetector</item>
         <item name="query" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\QueryRuleDetector</item>
         <item name="sqli" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\SimpleSqlInjection</item>
+        <item name="geo_velocity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\GeoVelocityDetector</item>
       </argument>
     </arguments>
   </type>

@@ -1,6 +1,21 @@
 An extensible, defense‑in‑depth Intrusion Detection & Prevention module for Magento 2.
 
+
+#v2.2.8
+
+Add GeoIP velocity checks, i.e. sudden country jumps per session/IP.
+
+Notes / Safety
+
+We intentionally don’t block on mobile tower drift by requiring min_distance_km (500km default). Tune per your risk appetite.
+
+
+Private/reserved IPs are ignored; add corporate/VPN egress ranges to Ignore CIDRs. No external calls — everything is local → fast and privacy-safe.
+
+
 #v2.2.7
+
+
 Add an editable, comma-separated allow-list of excluded paths in system config (so 3DS and 3rd party extensions, example: Amasty GDPR cookie endpoints won’t be inspected/blocked) 
 
 #v2.2.6

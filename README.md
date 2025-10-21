@@ -1,6 +1,11 @@
 An extensible, defense‑in‑depth Intrusion Detection & Prevention module for Magento 2.
 
 
+v3.1.0
+
+Add extensive tests to check each detector
+
+
 #v3.0.0
 
 Added Checkout abuse detection for carding/BIN velocity, failed AVS/CVV spikes.
@@ -97,13 +102,60 @@ My initial release focuses on safe, composable primitives: request inspection, b
 - `bin/magento merlin:id:unblock-ip 1.2.3.4`
 - `bin/magento merlin:id:list-blocked`
 
+6) Tests
+Example runs for each detector
+
+HeaderSanity
+
+bin/magento merlin:ids:test --scenario=headers
+
+
+IpBlockDetector (first block an IP in your grid)
+
+bin/magento merlin:ids:test --scenario=ipblock --ip=198.51.100.66
+
+
+HoneypotDetector
+
+bin/magento merlin:ids:test --scenario=honeypot
+
+
+PathAnomalyDetector
+
+bin/magento merlin:ids:test --scenario=path-anomaly
+
+
+SimpleSqlInjectionDetector
+
+bin/magento merlin:ids:test --scenario=path-sqli
+
+
+RateLimitDetector (repeat N times; adjust thresholds/window if needed)
+
+bin/magento merlin:ids:test --scenario=rate-limit --repeat=20 --sleep=0.05
+
+
+UserAgentDetector
+
+bin/magento merlin:ids:test --scenario=useragent-bot
+
+
+GeoVelocityDetector (simulate GB→US jump for same IP)
+
+bin/magento merlin:ids:test --scenario=geo-jump --geo-seed-country=GB --geo-now-country=US
+
+
+CheckoutAbuseDetector (it reads DB/logged attempts; still useful to ensure it runs on paymentish routes)
+
+bin/magento merlin:ids:test --scenario=checkout-abuse
+
 
 
 # Roadmap & Feature Ideas
 
 
-- **GeoIP velocity checks**: sudden country jumps per session/IP.
-- **Header sanity**: invalid Host, spoofed X-Forwarded-For, missing Accept headers.
+DONE **GeoIP velocity checks**: sudden country jumps per session/IP. 
+DONE **Header sanity**: invalid Host, spoofed X-Forwarded-For, missing Accept headers.
 - **GraphQL & REST hardening**: schema‑aware allowlists, depth/complexity limits.
 - **File upload guard**: MIME sniffing, extension allowlist, scan via ClamAV/ICAP.
 - **Admin path cloak**: randomize backend path detection + decoy endpoints.
@@ -111,10 +163,9 @@ My initial release focuses on safe, composable primitives: request inspection, b
 - **Behavioral bot scoring**: sliding window + exponential backoff blocking.
 - **Reputation lists**: optional integration with AbuseIPDB/Spamhaus (cachable, privacy‑aware).
 - **CSP & security headers**: auto‑inject recommended headers with per‑route overrides.
-- **Checkout abuse detection**: carding/BIN velocity, failed AVS/CVV spikes.
+DONE - **Checkout abuse detection**: carding/BIN velocity, failed AVS/CVV spikes.
 - **Captcha on demand**: trigger Captcha only when a risk score threshold is hit.
-- **Webhook to SIEM**: stream `merlin_intrusion_event` to Splunk/ELK via queue.
-- **Admin grids**: UI for Events & Blocked IPs with export, bulk actions.
+DONE - **Admin grids**: UI for Events & Blocked IPs with bulk actions.
 - **Decoy admin users**: honey‑credentials to instantly flag attackers.
 - **Inventory of scanners**: rolling UA/IP fingerprints to preemptively tarp.
 

@@ -49,6 +49,9 @@ class Config
     private const PATH_CHK_AVS_FAIL_TH     = 'checkout_abuse/avs_fail_threshold';
     private const PATH_CHK_CVV_FAIL_TH     = 'checkout_abuse/cvv_fail_threshold';
 
+    private const PATH_DIAG_ENABLED = 'diagnostics/enabled';
+    private const PATH_DIAG_SECRET  = 'diagnostics/secret';
+
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig
     ) {}
@@ -362,6 +365,14 @@ public function headersRequiredAcceptSubstrings(): array
         $maskDec = $mask === 0 ? 0 : (~((1 << (32 - $mask)) - 1) & 0xFFFFFFFF);
         return (($ipLong & $maskDec) === ($subnetLong & $maskDec));
     }
+
+       public function diagEnabled(): bool { 
+        return (bool)$this->get(self::PATH_DIAG_ENABLED); 
+        }
+
+       public function diagSecret(): string { 
+        return (string)($this->get(self::PATH_DIAG_SECRET) ?? ''); 
+       }
 
     /* ------------------------------
      * Excluded path prefixes (NEW)

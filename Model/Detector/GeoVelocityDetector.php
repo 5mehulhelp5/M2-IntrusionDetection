@@ -45,7 +45,7 @@ class GeoVelocityDetector implements DetectorInterface
         $lat = (float)($info['lat'] ?? 0.0);
         $lon = (float)($info['lon'] ?? 0.0);
         if ($iso === '') {
-            return [false, 'low', null]; // no geo → no signal
+            return [false, 'low', null]; // no geo ? no signal
         }
 
         // --- Session-level check
@@ -53,7 +53,7 @@ class GeoVelocityDetector implements DetectorInterface
         $sess = (array)($this->session->getData($sessKey) ?: []);
         $hit = $this->jumpDetected($sess, $iso, $lat, $lon, $now, (int)$this->config->geoWindowMinutes(), (int)$this->config->geoMinDistanceKm());
         if ($hit) {
-            return [true, $this->config->geoSeverity(), sprintf('Session country jump: %s → %s', $sess['iso'] ?? '??', $iso)];
+            return [true, $this->config->geoSeverity(), sprintf('Session country jump: %s ? %s', $sess['iso'] ?? '??', $iso)];
         }
         // update session
         $this->session->setData($sessKey, ['iso'=>$iso,'ts'=>$now,'lat'=>$lat,'lon'=>$lon]);
@@ -66,7 +66,7 @@ class GeoVelocityDetector implements DetectorInterface
         $this->saveCache($cacheKey, ['iso'=>$iso,'ts'=>$now,'lat'=>$lat,'lon'=>$lon], (int)$this->config->geoCacheTtl());
 
         if ($hitIp) {
-            return [true, $this->config->geoSeverity(), sprintf('IP country jump: %s → %s', $cached['iso'] ?? '??', $iso)];
+            return [true, $this->config->geoSeverity(), sprintf('IP country jump: %s ? %s', $cached['iso'] ?? '??', $iso)];
         }
 
         return [false, 'low', null];

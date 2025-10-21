@@ -49,6 +49,34 @@ class UpgradeSchema implements UpgradeSchemaInterface
             $conn->createTable($table);
         }
 
+        // Create merlin_payment_attempt
+$attemptTable = $setup->getTable('merlin_payment_attempt');
+if (!$conn->isTableExists($attemptTable)) {
+    $table = $conn->newTable($attemptTable)
+        ->setComment('Merlin IDS Payment Attempts')
+        ->addColumn('attempt_id', Table::TYPE_INTEGER, null, [
+            'identity' => true, 'unsigned' => true, 'nullable' => false, 'primary' => true
+        ], 'ID')
+        ->addColumn('created_at', Table::TYPE_TIMESTAMP, null, [
+            'nullable' => false, 'default' => Table::TIMESTAMP_INIT
+        ], 'Created At (UTC)')
+        ->addColumn('ip', Table::TYPE_TEXT, 45, ['nullable' => true], 'Client IP')
+        ->addColumn('customer_id', Table::TYPE_INTEGER, null, ['nullable' => true, 'unsigned' => true], 'Customer ID')
+        ->addColumn('email', Table::TYPE_TEXT, 255, ['nullable' => true], 'Email')
+        ->addColumn('payment_method', Table::TYPE_TEXT, 64, ['nullable' => true], 'Payment Method')
+        ->addColumn('bin6', Table::TYPE_TEXT, 8, ['nullable' => true], 'BIN (6)')
+        ->addColumn('last4', Table::TYPE_TEXT, 8, ['nullable' => true], 'Last4')
+        ->addColumn('avs_result', Table::TYPE_TEXT, 16, ['nullable' => true], 'AVS Result')
+        ->addColumn('cvv_result', Table::TYPE_TEXT, 16, ['nullable' => true], 'CVV Result')
+        ->addColumn('status', Table::TYPE_TEXT, 16, ['nullable' => false, 'default' => 'unknown'], 'Status (success|failed|unknown)')
+        ->addColumn('order_increment', Table::TYPE_TEXT, 32, ['nullable' => true], 'Order Increment')
+        ->addColumn('quote_id', Table::TYPE_INTEGER, null, ['nullable' => true, 'unsigned' => true], 'Quote ID')
+        ->addIndex($setup->getIdxName($attemptTable, ['created_at']), ['created_at'])
+        ->addIndex($setup->getIdxName($attemptTable, ['ip', 'created_at']), ['ip', 'created_at'])
+        ->addIndex($setup->getIdxName($attemptTable, ['bin6', 'created_at']), ['bin6', 'created_at']);
+    $conn->createTable($table);
+}
+
         // 2) Kill the legacy conflicting index if it somehow exists
         try {
             if ($conn->isTableExists($blockTable) && $this->indexExists($conn, $blockTable, 'MERLIN_BLOCKED_IP_IP')) {

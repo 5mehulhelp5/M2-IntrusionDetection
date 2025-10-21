@@ -15,6 +15,7 @@
         <item name="query" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\QueryRuleDetector</item>
         <item name="sqli" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\SimpleSqlInjection</item>
         <item name="geo_velocity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\GeoVelocityDetector</item>
+        <item name="header_sanity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\HeaderSanityDetector</item>
       </argument>
     </arguments>
   </type>

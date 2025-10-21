@@ -170,7 +170,56 @@
     <comment>Optional local networks/VPN egress ranges to exclude from geo checks.</comment>
   </field>
 </group>
+      <!-- ===========================
+          Headers (spoofed or bots)
+      ============================ -->
+<group id="headers" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+  <label>Header Sanity</label>
 
+  <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Enable</label>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="severity" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Severity on Hit</label>
+    <source_model>Merlin\IntrusionDetection\Model\Config\Source\Severity</source_model>
+  </field>
+
+  <field id="allowed_hosts" translate="label comment" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Allowed Host headers (one per line or comma-separated)</label>
+    <comment>e.g. example.com, www.example.com. Leave empty to allow any Host.</comment>
+  </field>
+
+  <field id="forbid_ip_host" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Forbid IP Host header</label>
+    <comment>Block when Host is a raw IP address unless explicitly allowed above.</comment>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="trusted_proxy_cidrs" translate="label comment" type="textarea" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Trusted Proxy CIDRs for X-Forwarded-For</label>
+    <comment>Last hop in XFF must be in these CIDRs. Leave empty to skip this check.</comment>
+  </field>
+
+  <field id="disallow_private_client_ip" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Disallow private/reserved client IP in XFF</label>
+    <comment>Reject XFF if the left-most client IP is private/reserved.</comment>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="require_accept" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Require Accept header (GET/HEAD)</label>
+    <comment>Flag requests missing an Accept header.</comment>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="required_accept_tokens" translate="label comment" type="textarea" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Expected Accept substrings</label>
+    <comment>Any of these substrings must appear in Accept (comma/newline). e.g. text/html, application/xhtml+xml</comment>
+  </field>
+</group>
+            
     </section>
   </system>
 </config>

@@ -51,6 +51,10 @@
   <!-- Services -->
   <preference for="Merlin\IntrusionDetection\Api\BlockServiceInterface" type="Merlin\IntrusionDetection\Model\BlockService"/>
 
+  <!-- Payment Attempt -->
+    <type name="Merlin\IntrusionDetection\Model\PaymentAttempt"/>
+    <type name="Merlin\IntrusionDetection\Model\ResourceModel\PaymentAttempt"/>
+
   <!-- Console commands -->
   <type name="Magento\Framework\Console\CommandList">
     <arguments>

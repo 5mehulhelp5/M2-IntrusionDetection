@@ -1,6 +1,10 @@
 An extensible, defense‑in‑depth Intrusion Detection & Prevention module for Magento 2.
 
 
+#v3.0.0
+
+Added Checkout abuse detection for carding/BIN velocity, failed AVS/CVV spikes.
+
 #v2.2.9
 
 Added Header Sanity Detector

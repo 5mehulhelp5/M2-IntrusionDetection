@@ -4,4 +4,12 @@
   <event name="controller_action_predispatch">
     <observer name="merlin_ids_predispatch_logger" instance="Merlin\IntrusionDetection\Observer\PredispatchLogger"/>
   </event>
+
+  <event name="sales_order_payment_place_end">
+    <observer name="merlin_ids_log_payment_success" instance="Merlin\IntrusionDetection\Observer\LogPaymentSuccess"/>
+  </event>
+
+  <event name="sales_model_service_quote_submit_failure">
+    <observer name="merlin_ids_log_payment_failure" instance="Merlin\IntrusionDetection\Observer\LogPaymentFailure"/>
+  </event>
 </config>

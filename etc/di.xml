@@ -16,6 +16,7 @@
         <item name="sqli" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\SimpleSqlInjection</item>
         <item name="geo_velocity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\GeoVelocityDetector</item>
         <item name="header_sanity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\HeaderSanityDetector</item>
+        <item name="checkout_abuse" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\CheckoutAbuseDetector</item>
       </argument>
     </arguments>
   </type>
@@ -50,6 +51,10 @@
 
   <!-- Services -->
   <preference for="Merlin\IntrusionDetection\Api\BlockServiceInterface" type="Merlin\IntrusionDetection\Model\BlockService"/>
+
+  <!-- Payment Attempt -->
+    <type name="Merlin\IntrusionDetection\Model\PaymentAttempt"/>
+    <type name="Merlin\IntrusionDetection\Model\ResourceModel\PaymentAttempt"/>
 
   <!-- Console commands -->
   <type name="Magento\Framework\Console\CommandList">

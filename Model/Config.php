@@ -41,6 +41,14 @@ class Config
     private const PATH_HEADERS_REQUIRE_ACCEPT          = 'headers/require_accept';
     private const PATH_HEADERS_REQUIRED_ACCEPT_TOKENS  = 'headers/required_accept_tokens';
 
+    private const PATH_CHK_ENABLED         = 'checkout_abuse/enabled';
+    private const PATH_CHK_SEVERITY        = 'checkout_abuse/severity';
+    private const PATH_CHK_WINDOW_MIN      = 'checkout_abuse/window_minutes';
+    private const PATH_CHK_IP_FAIL_TH      = 'checkout_abuse/ip_fail_threshold';
+    private const PATH_CHK_BIN_TH          = 'checkout_abuse/bin_threshold';
+    private const PATH_CHK_AVS_FAIL_TH     = 'checkout_abuse/avs_fail_threshold';
+    private const PATH_CHK_CVV_FAIL_TH     = 'checkout_abuse/cvv_fail_threshold';
+
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig
     ) {}
@@ -215,6 +223,15 @@ public function headersRequiredAcceptSubstrings(): array
     // keep in lowercase for case-insensitive contains checks
     return array_map('strtolower', $this->splitList(self::PATH_HEADERS_REQUIRED_ACCEPT_TOKENS));
 }
+
+    public function chkEnabled(): bool { return (bool)$this->get(self::PATH_CHK_ENABLED); }
+    public function chkSeverity(): string { return (string)($this->get(self::PATH_CHK_SEVERITY) ?: 'high'); }
+    public function chkWindowMinutes(): int { return max(1, (int)($this->get(self::PATH_CHK_WINDOW_MIN) ?: 15)); }
+    public function chkIpFailThreshold(): int { return max(1, (int)($this->get(self::PATH_CHK_IP_FAIL_TH) ?: 8)); }
+    public function chkBinThreshold(): int { return max(1, (int)($this->get(self::PATH_CHK_BIN_TH) ?: 12)); }
+    public function chkAvsFailThreshold(): int { return max(0, (int)($this->get(self::PATH_CHK_AVS_FAIL_TH) ?: 15)); }
+    public function chkCvvFailThreshold(): int { return max(0, (int)($this->get(self::PATH_CHK_CVV_FAIL_TH) ?: 10)); }
+    
     /* ------------------------------
      * Whitelist / Ignore IPs
      * ------------------------------ */

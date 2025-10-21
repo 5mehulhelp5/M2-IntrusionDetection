@@ -154,8 +154,8 @@ bin/magento merlin:ids:test --scenario=checkout-abuse
 # Roadmap & Feature Ideas
 
 
-- **GeoIP velocity checks**: sudden country jumps per session/IP.
-- **Header sanity**: invalid Host, spoofed X-Forwarded-For, missing Accept headers.
+DONE **GeoIP velocity checks**: sudden country jumps per session/IP. 
+DONE **Header sanity**: invalid Host, spoofed X-Forwarded-For, missing Accept headers.
 - **GraphQL & REST hardening**: schema‑aware allowlists, depth/complexity limits.
 - **File upload guard**: MIME sniffing, extension allowlist, scan via ClamAV/ICAP.
 - **Admin path cloak**: randomize backend path detection + decoy endpoints.
@@ -163,10 +163,9 @@ bin/magento merlin:ids:test --scenario=checkout-abuse
 - **Behavioral bot scoring**: sliding window + exponential backoff blocking.
 - **Reputation lists**: optional integration with AbuseIPDB/Spamhaus (cachable, privacy‑aware).
 - **CSP & security headers**: auto‑inject recommended headers with per‑route overrides.
-- **Checkout abuse detection**: carding/BIN velocity, failed AVS/CVV spikes.
+DONE - **Checkout abuse detection**: carding/BIN velocity, failed AVS/CVV spikes.
 - **Captcha on demand**: trigger Captcha only when a risk score threshold is hit.
-- **Webhook to SIEM**: stream `merlin_intrusion_event` to Splunk/ELK via queue.
-- **Admin grids**: UI for Events & Blocked IPs with export, bulk actions.
+DONE - **Admin grids**: UI for Events & Blocked IPs with bulk actions.
 - **Decoy admin users**: honey‑credentials to instantly flag attackers.
 - **Inventory of scanners**: rolling UA/IP fingerprints to preemptively tarp.
 

@@ -102,6 +102,53 @@ My initial release focuses on safe, composable primitives: request inspection, b
 - `bin/magento merlin:id:unblock-ip 1.2.3.4`
 - `bin/magento merlin:id:list-blocked`
 
+6) Tests
+Example runs for each detector
+
+HeaderSanity
+
+bin/magento merlin:ids:test --scenario=headers
+
+
+IpBlockDetector (first block an IP in your grid)
+
+bin/magento merlin:ids:test --scenario=ipblock --ip=198.51.100.66
+
+
+HoneypotDetector
+
+bin/magento merlin:ids:test --scenario=honeypot
+
+
+PathAnomalyDetector
+
+bin/magento merlin:ids:test --scenario=path-anomaly
+
+
+SimpleSqlInjectionDetector
+
+bin/magento merlin:ids:test --scenario=path-sqli
+
+
+RateLimitDetector (repeat N times; adjust thresholds/window if needed)
+
+bin/magento merlin:ids:test --scenario=rate-limit --repeat=20 --sleep=0.05
+
+
+UserAgentDetector
+
+bin/magento merlin:ids:test --scenario=useragent-bot
+
+
+GeoVelocityDetector (simulate GB→US jump for same IP)
+
+bin/magento merlin:ids:test --scenario=geo-jump --geo-seed-country=GB --geo-now-country=US
+
+
+CheckoutAbuseDetector (it reads DB/logged attempts; still useful to ensure it runs on paymentish routes)
+
+bin/magento merlin:ids:test --scenario=checkout-abuse
+
 
 
 # Roadmap & Feature Ideas

@@ -219,7 +219,53 @@
     <comment>Any of these substrings must appear in Accept (comma/newline). e.g. text/html, application/xhtml+xml</comment>
   </field>
 </group>
-            
+      <!-- ===========================
+          Checkout Abuse!!
+      ============================ -->
+  <group id="checkout_abuse" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+  <label>Checkout Abuse</label>
+
+  <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Enable</label>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="severity" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Severity on Hit</label>
+    <source_model>Merlin\IntrusionDetection\Model\Config\Source\Severity</source_model>
+  </field>
+
+  <field id="window_minutes" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Window (minutes)</label>
+    <comment>Lookback window for velocity checks.</comment>
+    <validate>validate-number</validate>
+  </field>
+
+  <field id="ip_fail_threshold" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>IP Failure Threshold</label>
+    <comment>Block/log if a single IP hits this many failed attempts in the window.</comment>
+    <validate>validate-number</validate>
+  </field>
+
+  <field id="bin_threshold" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>BIN Velocity Threshold</label>
+    <comment>Max attempts across site for the same BIN in the window.</comment>
+    <validate>validate-number</validate>
+  </field>
+
+  <field id="avs_fail_threshold" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>AVS Failure Threshold</label>
+    <comment>Total AVS failures across site in window (0 to disable).</comment>
+    <validate>validate-number</validate>
+  </field>
+
+  <field id="cvv_fail_threshold" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>CVV Failure Threshold</label>
+    <comment>Total CVV failures across site in window (0 to disable).</comment>
+    <validate>validate-number</validate>
+  </field>
+</group>
+           
     </section>
   </system>
 </config>

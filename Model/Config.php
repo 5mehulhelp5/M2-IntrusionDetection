@@ -345,6 +345,25 @@ public function headersRequiredAcceptSubstrings(): array
         $maskDec = $mask === 0 ? 0 : (~((1 << (32 - $mask)) - 1) & 0xFFFFFFFF);
         return (($ipLong & $maskDec) === ($subnetLong & $maskDec));
     }
+// SplitList Function
+private function splitList(string $path): array
+{
+    $raw = (string)($this->get($path) ?? '');
+    if ($raw === '') {
+        return [];
+    }
+
+    // Split on newlines or commas
+    $parts = preg_split('/[\r\n,]+/', $raw) ?: [];
+    $out = [];
+    foreach ($parts as $p) {
+        $p = trim($p);
+        if ($p !== '') {
+            $out[] = $p;
+        }
+    }
+    return $out;
+}
 
     /* ------------------------------
      * Excluded path prefixes (NEW)

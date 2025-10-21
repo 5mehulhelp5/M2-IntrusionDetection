@@ -56,6 +56,25 @@
     <type name="Merlin\IntrusionDetection\Model\PaymentAttempt"/>
     <type name="Merlin\IntrusionDetection\Model\ResourceModel\PaymentAttempt"/>
 
+<!-- Testing the shields -->
+
+<type name="Merlin\IntrusionDetection\Model\Detector\Runner">
+  <arguments>
+    <argument name="detectors" xsi:type="array">
+        <item name="ipblock" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\IpBlockDetector</item>
+        <item name="honeypot" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\HoneypotDetector</item>
+        <item name="ratelimit" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\RateLimitDetector</item>
+        <item name="ua" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\UserAgentDetector</item>
+        <item name="path" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\PathAnomalyDetector</item>
+        <item name="query" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\QueryRuleDetector</item>
+        <item name="sqli" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\SimpleSqlInjection</item>
+        <item name="geo_velocity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\GeoVelocityDetector</item>
+        <item name="header_sanity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\HeaderSanityDetector</item>
+        <item name="checkout_abuse" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\CheckoutAbuseDetector</item>
+    </argument>
+  </arguments>
+</type>
+
   <!-- Console commands -->
   <type name="Magento\Framework\Console\CommandList">
     <arguments>
@@ -64,6 +83,7 @@
         <item name="merlin_ids_block" xsi:type="object">Merlin\IntrusionDetection\Console\Command\BlockIpCommand</item>
         <item name="merlin_ids_unblock" xsi:type="object">Merlin\IntrusionDetection\Console\Command\UnblockIpCommand</item>
         <item name="merlin_ids_list" xsi:type="object">Merlin\IntrusionDetection\Console\Command\ListBlocksCommand</item>
+        <item name="merlin_ids_test" xsi:type="object">Merlin\IntrusionDetection\Console\Command\IdsTestCommand</item>
       </argument>
     </arguments>
   </type>

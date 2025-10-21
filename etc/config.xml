@@ -57,7 +57,33 @@ fc00::/7,
 fe80::/10
         ]]></ignore_cidrs>
       </geo>
-
+<!-- Spoofed Headers and Bots -->
+      <headers>
+      <enabled>1</enabled>
+      <severity>high</severity>
+      <allowed_hosts><![CDATA[
+theappliancedepot.co.uk,
+www.theappliancedepot.co.uk,
+dev.theappliancedepot.co.uk,
+vanilla.theappliancedepot.co.uk
+      ]]></allowed_hosts>
+      <forbid_ip_host>1</forbid_ip_host>
+      <trusted_proxy_cidrs><![CDATA[
+10.0.0.0/8,
+172.16.0.0/12,
+192.168.0.0/16,
+127.0.0.0/8,
+::1/128,
+fc00::/7,
+fe80::/10
+      ]]></trusted_proxy_cidrs>
+      <disallow_private_client_ip>1</disallow_private_client_ip>
+      <require_accept>1</require_accept>
+      <required_accept_tokens><![CDATA[
+text/html,
+application/xhtml+xml
+      ]]></required_accept_tokens>
+    </headers>
     </merlin_intrusion>
   </default>
 </config>

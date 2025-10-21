@@ -32,6 +32,15 @@ class Config
     private const PATH_GEO_SEVERITY       = 'geo/severity';
     private const PATH_GEO_IGNORE_CIDRS   = 'geo/ignore_cidrs';
 
+    private const PATH_HEADERS_ENABLED                 = 'headers/enabled';
+    private const PATH_HEADERS_SEVERITY                = 'headers/severity';
+    private const PATH_HEADERS_ALLOWED_HOSTS           = 'headers/allowed_hosts';
+    private const PATH_HEADERS_FORBID_IP_HOST          = 'headers/forbid_ip_host';
+    private const PATH_HEADERS_TRUSTED_PROXY_CIDRS     = 'headers/trusted_proxy_cidrs';
+    private const PATH_HEADERS_DISALLOW_PRIVATE_CLIENT = 'headers/disallow_private_client_ip';
+    private const PATH_HEADERS_REQUIRE_ACCEPT          = 'headers/require_accept';
+    private const PATH_HEADERS_REQUIRED_ACCEPT_TOKENS  = 'headers/required_accept_tokens';
+
     public function __construct(
         private readonly ScopeConfigInterface $scopeConfig
     ) {}
@@ -47,7 +56,18 @@ class Config
             ScopeInterface::SCOPE_STORE
         );
     }
-
+private function splitList(string $path): array
+{
+    $raw = (string)($this->get($path) ?? '');
+    if ($raw === '') return [];
+    $parts = preg_split('/[\r\n,]+/', $raw) ?: [];
+    $out = [];
+    foreach ($parts as $p) {
+        $p = trim($p);
+        if ($p !== '') $out[] = $p;
+    }
+    return $out;
+}
     /** Return trimmed, non-empty lines from a textarea config */
     private function getLines(string $path): array
     {
@@ -146,6 +166,55 @@ class Config
     return $out;
 }
 
+    public function headersEnabled(): bool
+{
+    return (bool)$this->get(self::PATH_HEADERS_ENABLED);
+}
+
+public function headersSeverity(): string
+{
+    return (string)($this->get(self::PATH_HEADERS_SEVERITY) ?: 'high');
+}
+
+public function headersAllowedHosts(): array
+{
+    $list = $this->splitList(self::PATH_HEADERS_ALLOWED_HOSTS);
+    // normalize to lowercase and strip ports if present
+    $norm = [];
+    foreach ($list as $h) {
+        $h = strtolower($h);
+        // remove :port if present
+        $h = preg_replace('/:\d+$/', '', $h);
+        if ($h !== '') $norm[$h] = true;
+    }
+    return array_keys($norm);
+}
+
+public function headersForbidIpHost(): bool
+{
+    return (bool)$this->get(self::PATH_HEADERS_FORBID_IP_HOST);
+}
+
+public function headersTrustedProxyCidrs(): array
+{
+    return $this->splitList(self::PATH_HEADERS_TRUSTED_PROXY_CIDRS);
+}
+
+public function headersDisallowPrivateClientIp(): bool
+{
+    return (bool)$this->get(self::PATH_HEADERS_DISALLOW_PRIVATE_CLIENT);
+}
+
+public function headersRequireAccept(): bool
+{
+    return (bool)$this->get(self::PATH_HEADERS_REQUIRE_ACCEPT);
+}
+
+public function headersRequiredAcceptSubstrings(): array
+{
+    // keep in lowercase for case-insensitive contains checks
+    return array_map('strtolower', $this->splitList(self::PATH_HEADERS_REQUIRED_ACCEPT_TOKENS));
+}
     /* ------------------------------
      * Whitelist / Ignore IPs
      * ------------------------------ */

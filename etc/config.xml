@@ -1,29 +1,44 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
   <default>
     <merlin_intrusion>
+
       <general>
         <enabled>1</enabled>
         <mode>detect</mode>
         <log_details>1</log_details>
-        <excluded_paths><![CDATA[/elavon/pi/challengeLoader,/opayo/pi/challengeLoader,/sagepay/pi/challengeLoader,/amgdprcookie/cookie/allow,/amgdprcookie/cookie/disallow,/amgdprcookie/cookie/save,/amgdprcookie/cookie/policy,/amgdprcookie/cookie/status]]>
-        </excluded_paths>
+        <excluded_paths><![CDATA[
+/elavon/pi/challengeLoader,
+/opayo/pi/challengeLoader,
+/sagepay/pi/challengeLoader,
+/amgdprcookie/cookie/allow,
+/amgdprcookie/cookie/disallow,
+/amgdprcookie/cookie/save,
+/amgdprcookie/cookie/policy,
+/amgdprcookie/cookie/status
+        ]]></excluded_paths>
       </general>
+
       <ratelimit>
         <enabled>1</enabled>
         <window_seconds>60</window_seconds>
         <max_requests>120</max_requests>
         <burst_factor>2</burst_factor>
       </ratelimit>
+
       <bruteforce>
         <enabled>1</enabled>
         <max_failures>5</max_failures>
         <lock_minutes>30</lock_minutes>
       </bruteforce>
+
       <honeypot>
         <enabled>1</enabled>
         <url>merlin/honeypot</url>
       </honeypot>
+
+      <!-- GeoIP Velocity defaults -->
       <geo>
         <enabled>1</enabled>
         <db_path></db_path>
@@ -42,6 +57,7 @@ fc00::/7,
 fe80::/10
         ]]></ignore_cidrs>
       </geo>
+
     </merlin_intrusion>
   </default>
 </config>

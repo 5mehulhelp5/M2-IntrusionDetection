@@ -266,6 +266,24 @@
   </field>
 </group>
            
+      <!-- ===========================
+          Diagnostic testing
+      ============================ -->
+
+<group id="diagnostics" translate="label" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+  <label>Diagnostics</label>
+
+  <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Enable Diagnostic Endpoint</label>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="secret" translate="label comment" type="obscure" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Diagnostic Secret</label>
+    <comment>Required as ?secret=... to access /merlin_ids/diag/index</comment>
+  </field>
+</group>
+
     </section>
   </system>
 </config>

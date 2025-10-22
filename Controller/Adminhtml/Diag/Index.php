@@ -9,6 +9,8 @@ use Magento\Framework\App\Request\HttpFactory;
 use Laminas\Stdlib\Parameters;
 use Magento\Framework\Controller\ResultFactory;
 use Merlin\IntrusionDetection\Model\Detector\Runner;
+use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
+
 
 class Index extends Action
 {
@@ -18,6 +20,7 @@ class Index extends Action
         Context $context,
         private readonly Runner $runner,
         private readonly HttpFactory $httpFactory
+        private readonly FormKeyValidator $formKeyValidator
     ) {
         parent::__construct($context);
     }
@@ -27,7 +30,11 @@ class Index extends Action
         // If POST, build a synthetic request and stash results in registry for the block/template
         if ($this->getRequest()->isPost()) {
             $p = $this->getRequest()->getPostValue();
-
+        
+            if (!$this->formKeyValidator->validate($this->getRequest())) {
+                $this->messageManager->addErrorMessage(__('Invalid form key. Please refresh and try again.'));
+                return $this->_redirect('*/*/index');
+      }
             // Build synthetic server array
             $server = [
                 'REQUEST_URI'          => (string)($p['uri'] ?? '/'),

@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 use Merlin\IntrusionDetection\Model\Detector\Runner;
+use Laminas\Stdlib\Parameters;
 
 /**
  * Run Merlin IDS detectors against a synthetic request.
@@ -159,10 +160,10 @@ class IdsTestCommand extends Command
 
         $rows = [];
         for ($i = 1; $i <= $repeat; $i++) {
-            $this->request->setServer($server);
-            $this->request->setMethod($server['REQUEST_METHOD']);
-            $this->request->setRequestUri($server['REQUEST_URI']);
-
+		$serverParams = new Parameters($server);
+		$this->request->setServer($serverParams);
+		$this->request->setMethod($serverParams->get('REQUEST_METHOD', 'GET'));
+		$this->request->setRequestUri($serverParams->get('REQUEST_URI', '/'));
             $results = $this->runner->run($this->request);
             foreach ($results as $r) {
                 $rows[] = [

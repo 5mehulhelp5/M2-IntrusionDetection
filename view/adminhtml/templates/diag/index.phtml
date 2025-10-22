@@ -10,7 +10,7 @@
 </div>
 
 <form id="merlin-ids-diag-form" method="post" action="<?= $block->escapeUrl($block->getPostUrl()) ?>">
-  <?= /* form key */ $block->getFormKey(); ?>
+  <?= $block->getBlockHtml('formkey'); ?>
   <fieldset class="admin__fieldset">
     <legend class="admin__legend"><span><?= $block->escapeHtml(__('Synthetic Request')) ?></span></legend>
     <div class="admin__field">

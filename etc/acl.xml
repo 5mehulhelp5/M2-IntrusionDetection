@@ -1,20 +1,36 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Merlin Intrusion Detection ACL
  */
 -->
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+
   <acl>
-  <resources>
-    <resource id="Magento_Backend::admin">
-      <resource id="Merlin_IntrusionDetection::root" title="Merlin Intrusion" sortOrder="950">
-        <resource id="Merlin_IntrusionDetection::events" title="Intrusion Events" />
-        <resource id="Merlin_IntrusionDetection::blocks" title="Blocked IPs" />
-         <resource id="Merlin_IntrusionDetection::blocked_ip" title="Edit Blocked IP"/>
+    <resources>
+      <resource id="Magento_Backend::admin">
+        <resource id="Merlin_IntrusionDetection::root"
+                  title="Merlin Intrusion"
+                  sortOrder="950">
+
+          <!-- Existing permissions -->
+          <resource id="Merlin_IntrusionDetection::events"
+                    title="Intrusion Events" />
+          <resource id="Merlin_IntrusionDetection::blocks"
+                    title="Blocked IPs" />
+          <resource id="Merlin_IntrusionDetection::blocked_ip"
+                    title="Edit Blocked IP" />
+
+          <!-- New permissions -->
+          <resource id="Merlin_IntrusionDetection::config"
+                    title="Configuration" />
+          <resource id="Merlin_IntrusionDetection::diagnostics"
+                    title="Diagnostics" />
+
+        </resource>
       </resource>
-    </resource>
-  </resources>
-</acl>
+    </resources>
+  </acl>
+
 </config>

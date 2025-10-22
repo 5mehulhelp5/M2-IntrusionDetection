@@ -1,0 +1,113 @@
+<?php /** @var $block \Merlin\IntrusionDetection\Block\Adminhtml\Diag\Index */ ?>
+<div class="page-main-actions">
+  <div class="page-actions">
+    <div class="page-actions-buttons">
+      <button class="action-default scalable save primary" form="merlin-ids-diag-form" type="submit">
+        <span><?= $block->escapeHtml(__('Run Detectors')) ?></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<form id="merlin-ids-diag-form" method="post" action="<?= $block->escapeUrl($block->getPostUrl()) ?>">
+  <?= /* form key */ $block->getFormKey(); ?>
+  <fieldset class="admin__fieldset">
+    <legend class="admin__legend"><span><?= $block->escapeHtml(__('Synthetic Request')) ?></span></legend>
+    <div class="admin__field">
+      <label class="admin__field-label"><span><?= $block->escapeHtml(__('Scenario')) ?></span></label>
+      <div class="admin__field-control">
+        <select name="scenario" class="admin__control-select">
+          <option value=""><?= $block->escapeHtml(__('(Custom)')) ?></option>
+          <option value="headers">Header sanity</option>
+          <option value="honeypot">Honeypot</option>
+          <option value="path-sqli">Path SQLi</option>
+          <option value="path-anomaly">Path anomaly</option>
+          <option value="useragent-bot">User-agent bot</option>
+          <option value="checkout-abuse">Checkout abuse route</option>
+          <option value="rate-limit">Rate-limit (use Repeat)</option>
+          <option value="geo-jump">Geo velocity (adjust headers manually)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="admin__field">
+      <label class="admin__field-label"><span>Method</span></label>
+      <div class="admin__field-control"><input class="admin__control-text" type="text" name="method" value="GET"/></div>
+    </div>
+    <div class="admin__field">
+      <label class="admin__field-label"><span>URI</span></label>
+      <div class="admin__field-control"><input class="admin__control-text" type="text" name="uri" value="/"/></div>
+    </div>
+    <div class="admin__field">
+      <label class="admin__field-label"><span>Host</span></label>
+      <div class="admin__field-control"><input class="admin__control-text" type="text" name="host" value="www.theappliancedepot.co.uk"/></div>
+    </div>
+    <div class="admin__field">
+      <label class="admin__field-label"><span>IP</span></label>
+      <div class="admin__field-control"><input class="admin__control-text" type="text" name="ip" value="203.0.113.10"/></div>
+    </div>
+    <div class="admin__field">
+      <label class="admin__field-label"><span>X-Forwarded-For</span></label>
+      <div class="admin__field-control"><input class="admin__control-text" type="text" name="xff" value=""/></div>
+    </div>
+    <div class="admin__field">
+      <label class="admin__field-label"><span>Accept</span></label>
+      <div class="admin__field-control"><input class="admin__control-text" type="text" name="accept" value="text/html,application/xhtml+xml"/></div>
+    </div>
+    <div class="admin__field">
+      <label class="admin__field-label"><span>User-Agent</span></label>
+      <div class="admin__field-control"><input class="admin__control-text" type="text" name="ua" value="Mozilla/5.0 (Merlin IDS Admin)"/></div>
+    </div>
+
+    <div class="admin__field">
+      <label class="admin__field-label"><span>Repeat</span></label>
+      <div class="admin__field-control"><input class="admin__control-text" type="number" min="1" name="repeat" value="1"/></div>
+    </div>
+    <div class="admin__field">
+      <label class="admin__field-label"><span>Sleep (sec)</span></label>
+      <div class="admin__field-control"><input class="admin__control-text" type="text" name="sleep" value="0"/></div>
+    </div>
+  </fieldset>
+</form>
+
+<?php
+$payload = $block->getResults();
+if ($payload):
+  $server  = $payload['server']  ?? [];
+  $results = $payload['results'] ?? [];
+?>
+<div class="admin__fieldset">
+  <legend class="admin__legend"><span><?= $block->escapeHtml(__('Results')) ?></span></legend>
+
+  <p>
+    <strong>Method:</strong> <?= $block->escapeHtml($server['REQUEST_METHOD'] ?? '') ?>
+    &nbsp; <strong>URI:</strong> <?= $block->escapeHtml($server['REQUEST_URI'] ?? '') ?><br/>
+    <strong>Host:</strong> <?= $block->escapeHtml($server['HTTP_HOST'] ?? '') ?>
+    &nbsp; <strong>IP:</strong> <?= $block->escapeHtml($server['REMOTE_ADDR'] ?? '') ?><br/>
+    <?php if (!empty($server['HTTP_X_FORWARDED_FOR'])): ?>
+      <strong>XFF:</strong> <?= $block->escapeHtml($server['HTTP_X_FORWARDED_FOR']) ?><br/>
+    <?php endif; ?>
+  </p>
+
+  <table class="data-grid">
+    <thead>
+      <tr>
+        <th><?= $block->escapeHtml(__('Detector')) ?></th>
+        <th><?= $block->escapeHtml(__('Hit')) ?></th>
+        <th><?= $block->escapeHtml(__('Severity')) ?></th>
+        <th><?= $block->escapeHtml(__('Details')) ?></th>
+      </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($results as $r): ?>
+      <tr>
+        <td><?= $block->escapeHtml($r['name']) ?></td>
+        <td><?= $r['hit'] ? '<span style="color:#c00;font-weight:bold">YES</span>' : 'no' ?></td>
+        <td><?= $block->escapeHtml($r['severity']) ?></td>
+        <td><?= $block->escapeHtml($r['details'] ?? '') ?></td>
+      </tr>
+    <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
+<?php endif; ?>

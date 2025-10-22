@@ -13,5 +13,12 @@
          module="Merlin_IntrusionDetection" sortOrder="20"
          parent="Merlin_IntrusionDetection::root" action="merlin_id/block/index"
          resource="Merlin_IntrusionDetection::blocks"/>
+    <add id="Merlin_IntrusionDetection::diagnostics"
+         title="Diagnostics"
+         module="Merlin_IntrusionDetection"
+         sortOrder="30"
+         parent="Merlin_IntrusionDetection::root"
+         action="merlinids/diag/index"
+         resource="Merlin_IntrusionDetection::diagnostics"/>
   </menu>
 </config>

@@ -5,13 +5,20 @@
     <add id="Merlin_IntrusionDetection::root" title="Merlin Intrusion"
          module="Merlin_IntrusionDetection" sortOrder="950"
          parent="Magento_Backend::stores" resource="Merlin_IntrusionDetection::root"/>
+
     <add id="Merlin_IntrusionDetection::events" title="Intrusion Events"
          module="Merlin_IntrusionDetection" sortOrder="10"
          parent="Merlin_IntrusionDetection::root" action="merlin_id/event/index"
          resource="Merlin_IntrusionDetection::events"/>
+
     <add id="Merlin_IntrusionDetection::blocks" title="Blocked IPs"
          module="Merlin_IntrusionDetection" sortOrder="20"
          parent="Merlin_IntrusionDetection::root" action="merlin_id/block/index"
          resource="Merlin_IntrusionDetection::blocks"/>
-  </menu>
+
+    <add id="Merlin_IntrusionDetection::diagnostics" title="Diagnostics"
+         module="Merlin_IntrusionDetection" sortOrder="30"
+         parent="Merlin_IntrusionDetection::root" action="merlin_id/diag/index"
+         resource="Merlin_IntrusionDetection::diagnostics"/>  
+   </menu>
 </config>

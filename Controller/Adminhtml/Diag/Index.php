@@ -6,36 +6,55 @@ namespace Merlin\IntrusionDetection\Controller\Adminhtml\Diag;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Framework\App\Request\HttpFactory;
-use Laminas\Stdlib\Parameters;
 use Magento\Framework\Controller\ResultFactory;
-use Merlin\IntrusionDetection\Model\Detector\Runner;
 use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
-
+use Magento\Framework\Registry;
+use Laminas\Stdlib\Parameters;
+use Merlin\IntrusionDetection\Model\Detector\Runner;
 
 class Index extends Action
 {
-    public const ADMIN_RESOURCE = 'Merlin_IntrusionDetection::diagnostics';
+    /** ACL */
+    const ADMIN_RESOURCE = 'Merlin_IntrusionDetection::diagnostics';
+
+    /** @var Runner */
+    protected $runner;
+
+    /** @var HttpFactory */
+    protected $httpFactory;
+
+    /** @var FormKeyValidator */
+    protected $formKeyValidator;
+
+    /** @var Registry */
+    protected $registry;
 
     public function __construct(
         Context $context,
-        private readonly Runner $runner,
-        private readonly HttpFactory $httpFactory
-        private readonly FormKeyValidator $formKeyValidator
+        Runner $runner,
+        HttpFactory $httpFactory,
+        FormKeyValidator $formKeyValidator,
+        Registry $registry
     ) {
         parent::__construct($context);
+        $this->runner = $runner;
+        $this->httpFactory = $httpFactory;
+        $this->formKeyValidator = $formKeyValidator;
+        $this->registry = $registry;
     }
 
     public function execute()
     {
-        // If POST, build a synthetic request and stash results in registry for the block/template
         if ($this->getRequest()->isPost()) {
-            $p = $this->getRequest()->getPostValue();
-        
+            // Validate form key to prevent the admin bounce
             if (!$this->formKeyValidator->validate($this->getRequest())) {
                 $this->messageManager->addErrorMessage(__('Invalid form key. Please refresh and try again.'));
                 return $this->_redirect('*/*/index');
-      }
-            // Build synthetic server array
+            }
+
+            $p = (array)$this->getRequest()->getPostValue();
+
+            // Build a synthetic SERVER map for the runner
             $server = [
                 'REQUEST_URI'          => (string)($p['uri'] ?? '/'),
                 'REQUEST_METHOD'       => strtoupper((string)($p['method'] ?? 'GET')),
@@ -46,7 +65,7 @@ class Index extends Action
                 'HTTP_USER_AGENT'      => (string)($p['ua'] ?? 'Mozilla/5.0 (Merlin IDS Admin)'),
             ];
 
-            // Optionally pre-fill for scenario shortcuts
+            // Optional quick scenarios
             $scenario = (string)($p['scenario'] ?? '');
             switch ($scenario) {
                 case 'headers':
@@ -78,7 +97,7 @@ class Index extends Action
                     break;
             }
 
-            // Create a fresh Http request so we don't mutate the admin request object
+            // Fresh Http request for the runner; Laminas expects Parameters
             $synthetic = $this->httpFactory->create();
             $synthetic->setServer(new Parameters($server));
             $synthetic->setMethod($server['REQUEST_METHOD']);
@@ -86,16 +105,18 @@ class Index extends Action
 
             $results = $this->runner->run($synthetic);
 
-            // Hand off to block via registry (or session)
-            $this->_objectManager->get(\Magento\Framework\Registry::class)
-                ->register('merlin_ids_diag_results', [
-                    'server'  => $server,
-                    'results' => $results,
-                ], true);
+            // Hand off to the template via registry
+            $this->registry->register(
+                'merlin_ids_diag_results',
+                ['server' => $server, 'results' => $results],
+                true
+            );
         }
 
-        return $this->resultFactory->create(ResultFactory::TYPE_PAGE)
-            ->setActiveMenu('Merlin_IntrusionDetection::diagnostics')
-            ->getConfig()->getTitle()->prepend(__('Merlin IDS Diagnostics'));
+        /** @var \Magento\Backend\Model\View\Result\Page $page */
+        $page = $this->resultFactory->create(ResultFactory::TYPE_PAGE);
+        $page->setActiveMenu('Merlin_IntrusionDetection::diagnostics');
+        $page->getConfig()->getTitle()->prepend(__('Merlin IDS Diagnostics'));
+        return $page;
     }
 }

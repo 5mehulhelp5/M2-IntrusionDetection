@@ -58,7 +58,7 @@ class Index extends Action
             $server = [
                 'REQUEST_URI'          => (string)($p['uri'] ?? '/'),
                 'REQUEST_METHOD'       => strtoupper((string)($p['method'] ?? 'GET')),
-                'HTTP_HOST'            => (string)($p['host'] ?? 'www.theappliancedepot.co.uk'),
+                'HTTP_HOST'            => (string)($p['host'] ?? 'www.yourdomainnamehere.co.uk'),
                 'REMOTE_ADDR'          => (string)($p['ip'] ?? '203.0.113.10'),
                 'HTTP_X_FORWARDED_FOR' => (string)($p['xff'] ?? ''),
                 'HTTP_ACCEPT'          => (string)($p['accept'] ?? 'text/html,application/xhtml+xml'),

@@ -1,0 +1,122 @@
+<?php
+declare(strict_types=1);
+
+namespace Merlin\IntrusionDetection\Controller\Adminhtml\Diag;
+
+use Magento\Backend\App\Action;
+use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\Request\HttpFactory;
+use Magento\Framework\Controller\ResultFactory;
+use Magento\Framework\Data\Form\FormKey\Validator as FormKeyValidator;
+use Magento\Framework\Registry;
+use Laminas\Stdlib\Parameters;
+use Merlin\IntrusionDetection\Model\Detector\Runner;
+
+class Index extends Action
+{
+    /** ACL */
+    const ADMIN_RESOURCE = 'Merlin_IntrusionDetection::diagnostics';
+
+    /** @var Runner */
+    protected $runner;
+
+    /** @var HttpFactory */
+    protected $httpFactory;
+
+    /** @var FormKeyValidator */
+    protected $formKeyValidator;
+
+    /** @var Registry */
+    protected $registry;
+
+    public function __construct(
+        Context $context,
+        Runner $runner,
+        HttpFactory $httpFactory,
+        FormKeyValidator $formKeyValidator,
+        Registry $registry
+    ) {
+        parent::__construct($context);
+        $this->runner = $runner;
+        $this->httpFactory = $httpFactory;
+        $this->formKeyValidator = $formKeyValidator;
+        $this->registry = $registry;
+    }
+
+    public function execute()
+    {
+        if ($this->getRequest()->isPost()) {
+            // Validate form key to prevent the admin bounce
+            if (!$this->formKeyValidator->validate($this->getRequest())) {
+                $this->messageManager->addErrorMessage(__('Invalid form key. Please refresh and try again.'));
+                return $this->_redirect('*/*/index');
+            }
+
+            $p = (array)$this->getRequest()->getPostValue();
+
+            // Build a synthetic SERVER map for the runner
+            $server = [
+                'REQUEST_URI'          => (string)($p['uri'] ?? '/'),
+                'REQUEST_METHOD'       => strtoupper((string)($p['method'] ?? 'GET')),
+                'HTTP_HOST'            => (string)($p['host'] ?? 'www.yourdomainnamehere.co.uk'),
+                'REMOTE_ADDR'          => (string)($p['ip'] ?? '203.0.113.10'),
+                'HTTP_X_FORWARDED_FOR' => (string)($p['xff'] ?? ''),
+                'HTTP_ACCEPT'          => (string)($p['accept'] ?? 'text/html,application/xhtml+xml'),
+                'HTTP_USER_AGENT'      => (string)($p['ua'] ?? 'Mozilla/5.0 (Merlin IDS Admin)'),
+            ];
+
+            // Optional quick scenarios
+            $scenario = (string)($p['scenario'] ?? '');
+            switch ($scenario) {
+                case 'headers':
+                    $server['HTTP_HOST'] = 'attacker.invalid';
+                    $server['HTTP_ACCEPT'] = '';
+                    break;
+                case 'honeypot':
+                    $server['REQUEST_URI'] = '/merlin/honeypot';
+                    break;
+                case 'path-sqli':
+                    $server['REQUEST_URI'] = '/catalogsearch/result/?q=%27%20OR%201%3D1--';
+                    break;
+                case 'path-anomaly':
+                    $server['REQUEST_URI'] = '/wp-admin/.env';
+                    break;
+                case 'useragent-bot':
+                    $server['HTTP_USER_AGENT'] = 'curl/7.88 (bot test)';
+                    $server['HTTP_ACCEPT'] = '';
+                    break;
+                case 'checkout-abuse':
+                    $server['REQUEST_URI'] = '/rest/V1/carts/123/payment-information';
+                    $server['HTTP_ACCEPT'] = 'application/json';
+                    break;
+                case 'rate-limit':
+                case 'geo-jump':
+                case '':
+                default:
+                    // leave as provided
+                    break;
+            }
+
+            // Fresh Http request for the runner; Laminas expects Parameters
+            $synthetic = $this->httpFactory->create();
+            $synthetic->setServer(new Parameters($server));
+            $synthetic->setMethod($server['REQUEST_METHOD']);
+            $synthetic->setRequestUri($server['REQUEST_URI']);
+
+            $results = $this->runner->run($synthetic);
+
+            // Hand off to the template via registry
+            $this->registry->register(
+                'merlin_ids_diag_results',
+                ['server' => $server, 'results' => $results],
+                true
+            );
+        }
+
+        /** @var \Magento\Backend\Model\View\Result\Page $page */
+        $page = $this->resultFactory->create(ResultFactory::TYPE_PAGE);
+        $page->setActiveMenu('Merlin_IntrusionDetection::diagnostics');
+        $page->getConfig()->getTitle()->prepend(__('Merlin IDS Diagnostics'));
+        return $page;
+    }
+}

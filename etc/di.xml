@@ -1,28 +1,89 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-  <type name="Magento\Framework\App\FrontControllerInterface">
-    <plugin name="merlin_intrusion_guard" type="Merlin\IntrusionDetection\Plugin\FrontController\IntrusionGuard" sortOrder="10"/>
-  </type>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
 
-  <type name="Merlin\IntrusionDetection\Plugin\FrontController\IntrusionGuard">
+
+  <!-- Inject detectors -->
+  <type name="Merlin\IntrusionDetection\Plugin\IntrusionGuard">
     <arguments>
       <argument name="detectors" xsi:type="array">
-        <item name="ipBlock" xsi:type="object">Merlin\IntrusionDetection\Model\Detection\IpBlockDetector</item>
-        <item name="rate" xsi:type="object">Merlin\IntrusionDetection\Model\Detection\RateLimiterDetector</item>
-        <item name="path" xsi:type="object">Merlin\IntrusionDetection\Model\Detection\PathAnomalyDetector</item>
-        <item name="ua" xsi:type="object">Merlin\IntrusionDetection\Model\Detection\UserAgentDetector</item>
-        <item name="query" xsi:type="object">Merlin\IntrusionDetection\Model\Detection\QueryRuleDetector</item>
-        <item name="honeypot" xsi:type="object">Merlin\IntrusionDetection\Model\Detection\HoneypotDetector</item>
+        <item name="ipblock" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\IpBlockDetector</item>
+        <item name="honeypot" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\HoneypotDetector</item>
+        <item name="ratelimit" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\RateLimitDetector</item>
+        <item name="ua" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\UserAgentDetector</item>
+        <item name="path" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\PathAnomalyDetector</item>
+        <item name="query" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\QueryRuleDetector</item>
+        <item name="sqli" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\SimpleSqlInjection</item>
+        <item name="geo_velocity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\GeoVelocityDetector</item>
+        <item name="header_sanity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\HeaderSanityDetector</item>
+        <item name="checkout_abuse" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\CheckoutAbuseDetector</item>
       </argument>
     </arguments>
   </type>
 
-  <type name="Symfony\Component\Console\Application">
+ <!-- Map Datasource -->
+<type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+    <arguments>
+        <argument name="collections" xsi:type="array">
+            <item name="merlin_intrusion_event_listing_data_source"
+                  xsi:type="string">Merlin\IntrusionDetection\Model\ResourceModel\EventLog\Grid\Collection</item>
+
+            <item name="merlin_blocked_ip_listing_data_source"
+                  xsi:type="string">Merlin\IntrusionDetection\Model\ResourceModel\BlockedIp\Grid\Collection</item>
+        </argument>
+    </arguments>
+</type>
+
+  <!-- Logger wiring -->
+  <type name="Merlin\IntrusionDetection\Logger\IdsLogger">
+    <arguments>
+      <argument name="name" xsi:type="string">merlin_ids</argument>
+      <argument name="handlers" xsi:type="array">
+        <item name="default" xsi:type="object">Merlin\IntrusionDetection\Logger\Handler</item>
+      </argument>
+    </arguments>
+  </type>
+
+  <!-- Log the UI render endpoint -->
+  <type name="Magento\Ui\Controller\Index\Render">
+    <plugin name="merlin_ids_ui_render_logger" type="Merlin\IntrusionDetection\Plugin\Ui\RenderLogger" sortOrder="10"/>
+  </type>
+
+  <!-- Services -->
+  <preference for="Merlin\IntrusionDetection\Api\BlockServiceInterface" type="Merlin\IntrusionDetection\Model\BlockService"/>
+
+  <!-- Payment Attempt -->
+    <type name="Merlin\IntrusionDetection\Model\PaymentAttempt"/>
+    <type name="Merlin\IntrusionDetection\Model\ResourceModel\PaymentAttempt"/>
+
+<!-- Testing the shields -->
+
+<type name="Merlin\IntrusionDetection\Model\Detector\Runner">
+  <arguments>
+    <argument name="detectors" xsi:type="array">
+        <item name="ipblock" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\IpBlockDetector</item>
+        <item name="honeypot" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\HoneypotDetector</item>
+        <item name="ratelimit" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\RateLimitDetector</item>
+        <item name="ua" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\UserAgentDetector</item>
+        <item name="path" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\PathAnomalyDetector</item>
+        <item name="query" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\QueryRuleDetector</item>
+        <item name="sqli" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\SimpleSqlInjection</item>
+        <item name="geo_velocity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\GeoVelocityDetector</item>
+        <item name="header_sanity" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\HeaderSanityDetector</item>
+        <item name="checkout_abuse" xsi:type="object">Merlin\IntrusionDetection\Model\Detector\CheckoutAbuseDetector</item>
+    </argument>
+  </arguments>
+</type>
+
+  <!-- Console commands -->
+  <type name="Magento\Framework\Console\CommandList">
     <arguments>
       <argument name="commands" xsi:type="array">
-        <item name="merlin_id_block" xsi:type="object">Merlin\IntrusionDetection\Console\BlockIpCommand</item>
-        <item name="merlin_id_unblock" xsi:type="object">Merlin\IntrusionDetection\Console\UnblockIpCommand</item>
-        <item name="merlin_id_list" xsi:type="object">Merlin\IntrusionDetection\Console\ListBlockedCommand</item>
+        <item name="merlin_ids_flush" xsi:type="object">Merlin\IntrusionDetection\Console\Command\FlushEventsCommand</item>
+        <item name="merlin_ids_block" xsi:type="object">Merlin\IntrusionDetection\Console\Command\BlockIpCommand</item>
+        <item name="merlin_ids_unblock" xsi:type="object">Merlin\IntrusionDetection\Console\Command\UnblockIpCommand</item>
+        <item name="merlin_ids_list" xsi:type="object">Merlin\IntrusionDetection\Console\Command\ListBlocksCommand</item>
+        <item name="merlin_ids_test" xsi:type="object">Merlin\IntrusionDetection\Console\Command\IdsTestCommand</item>
       </argument>
     </arguments>
   </type>

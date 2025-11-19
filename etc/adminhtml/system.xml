@@ -1,67 +1,289 @@
 <?xml version="1.0"?>
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
   <system>
-    <section id="merlin_intrusion" translate="label" type="text" sortOrder="950" showInDefault="1" showInWebsite="1" showInStore="1">
+    <section id="merlin_intrusion" translate="label" type="text"
+             sortOrder="950" showInDefault="1" showInWebsite="1" showInStore="1">
       <label>Merlin Intrusion Detection</label>
       <tab>security</tab>
       <resource>Merlin_IntrusionDetection::config</resource>
-      <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+
+      <!-- ===========================
+           GENERAL SETTINGS
+      ============================ -->
+      <group id="general" translate="label" sortOrder="10"
+             showInDefault="1" showInWebsite="1" showInStore="1">
         <label>General</label>
-        <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+
+        <field id="enabled" translate="label" type="select" sortOrder="10"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Enabled</label>
           <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
         </field>
-        <field id="mode" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+
+        <field id="mode" translate="label" type="select" sortOrder="20"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Action Mode</label>
-          <comment>Detect-only or Block request on hit</comment>
-          <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-          <frontend_model>Magento\Config\Block\System\Config\Form\Field\Heading</frontend_model>
+          <source_model>Merlin\IntrusionDetection\Model\Config\Source\Mode</source_model>
+          <comment>Detect = log only; Block = 403 + auto-block on high/critical.</comment>
         </field>
-        <field id="log_details" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-          <label>Log Request Details</label>
-          <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+
+        <!-- Whitelist / Ignore IPs -->
+        <field id="whitelist" translate="label" type="textarea" sortOrder="30"
+               showInDefault="1" showInWebsite="1" showInStore="1">
+          <label>Whitelist (comma or newline separated IPs)</label>
+          <comment>Requests from these IPs bypass detectors and blocks.</comment>
+        </field>
+
+        <!-- NEW: Excluded Paths -->
+        <field id="excluded_paths" translate="label,comment" type="textarea" sortOrder="35"
+               showInDefault="1" showInWebsite="1" showInStore="1">
+          <label>Excluded Paths (comma or newline separated)</label>
+          <comment><![CDATA[
+            Requests whose <strong>path starts with</strong> any of these values will skip IDS inspection.<br/>
+            Examples:<br/>
+            <code>/elavon/pi/challengeLoader</code><br/>
+            <code>/amgdprcookie/cookie/allow</code><br/>
+            <code>/amgdprcookie/cookie/status</code>
+          ]]></comment>
+        </field>
+
+        <!-- Blockpage / Contact Info -->
+        <field id="blocked_title" translate="label" type="text" sortOrder="40"
+               showInDefault="1" showInWebsite="1" showInStore="1">
+          <label>Blocked Page Title</label>
+          <comment>Shown as the page title for blocked visitors.</comment>
+        </field>
+
+        <field id="blocked_message" translate="label" type="textarea" sortOrder="50"
+               showInDefault="1" showInWebsite="1" showInStore="1">
+          <label>Blocked Message (HTML allowed)</label>
+          <comment>Explain why they were blocked and how to get help.</comment>
+        </field>
+
+        <field id="contact_email" translate="label" type="text" sortOrder="60"
+               showInDefault="1" showInWebsite="1" showInStore="1">
+          <label>Contact Email</label>
+        </field>
+
+        <field id="contact_phone" translate="label" type="text" sortOrder="70"
+               showInDefault="1" showInWebsite="1" showInStore="1">
+          <label>Contact Phone</label>
         </field>
       </group>
-      <group id="ratelimit" translate="label" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+
+      <!-- ===========================
+           RATE LIMIT SETTINGS
+      ============================ -->
+      <group id="ratelimit" translate="label" sortOrder="20"
+             showInDefault="1" showInWebsite="1" showInStore="1">
         <label>Rate Limiting</label>
-        <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+
+        <field id="enabled" translate="label" type="select" sortOrder="10"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Enable</label>
           <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
         </field>
-        <field id="window_seconds" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+
+        <field id="window_seconds" translate="label" type="text" sortOrder="20"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Window (seconds)</label>
+          <validate>validate-number</validate>
         </field>
-        <field id="max_requests" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-          <label>Max Requests / Window / IP</label>
-        </field>
-        <field id="burst_factor" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
-          <label>Burst Factor</label>
-        </field>
-      </group>
-      <group id="bruteforce" translate="label" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-        <label>Brute‑force Protection</label>
-        <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
-          <label>Enable</label>
-          <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-        </field>
-        <field id="max_failures" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-          <label>Max Failed Logins</label>
-        </field>
-        <field id="lock_minutes" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
-          <label>Lock Duration (minutes)</label>
+
+        <field id="max_requests" translate="label" type="text" sortOrder="30"
+               showInDefault="1" showInWebsite="1" showInStore="1">
+          <label>Max Requests per Window per IP</label>
+          <validate>validate-number</validate>
         </field>
       </group>
-      <group id="honeypot" translate="label" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+
+      <!-- ===========================
+           HONEYPOT SETTINGS
+      ============================ -->
+      <group id="honeypot" translate="label" sortOrder="30"
+             showInDefault="1" showInWebsite="1" showInStore="1">
         <label>Honeypot</label>
-        <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+
+        <field id="enabled" translate="label" type="select" sortOrder="10"
+               showInDefault="1" showInWebsite="1" showInStore="1">
           <label>Enable</label>
           <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
         </field>
-        <field id="url" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-          <label>Honeypot URL</label>
-          <comment>Hidden bait endpoint to trap bots</comment>
+
+        <field id="url" translate="label" type="text" sortOrder="20"
+               showInDefault="1" showInWebsite="1" showInStore="1">
+          <label>Honeypot URL Path</label>
+          <comment>Example: /_hp</comment>
         </field>
       </group>
+
+      <!-- ===========================
+           GeoIP Velocity
+      ============================ -->
+
+    <group id="geo" translate="label" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>GeoIP Velocity</label>
+
+   <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Enable</label>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="db_path" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
+    <label>MaxMind DB Path</label>
+    <comment>Absolute path to GeoLite2-City.mmdb. Leave blank for default: var/geo/GeoLite2-City.mmdb</comment>
+  </field>
+
+  <field id="window_minutes" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Session Window (minutes)</label>
+    <comment>Flag a jump if country changes within this time window for the same session.</comment>
+    <validate>validate-number validate-greater-than-zero</validate>
+  </field>
+
+  <field id="ip_window_minutes" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>IP Window (minutes)</label>
+    <comment>Flag a jump if country changes within this time window for the same IP.</comment>
+    <validate>validate-number validate-greater-than-zero</validate>
+  </field>
+
+  <field id="min_distance_km" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Minimum Distance (km)</label>
+    <comment>Require at least this distance between locations to flag (helps with border towns/roaming).</comment>
+    <validate>validate-number</validate>
+  </field>
+
+  <field id="cache_ttl" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>IP Cache TTL (seconds)</label>
+    <comment>How long to keep last IP location in cache.</comment>
+    <validate>validate-number</validate>
+  </field>
+
+  <field id="severity" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Severity on Hit</label>
+    <comment>Which severity to log and use for auto-block escalation.</comment>
+    <source_model>Merlin\IntrusionDetection\Model\Config\Source\Severity</source_model>
+  </field>
+
+  <field id="ignore_cidrs" translate="label comment" type="textarea" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Ignore CIDRs (comma/newline)</label>
+    <comment>Optional local networks/VPN egress ranges to exclude from geo checks.</comment>
+  </field>
+</group>
+      <!-- ===========================
+          Headers (spoofed or bots)
+      ============================ -->
+<group id="headers" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+  <label>Header Sanity</label>
+
+  <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Enable</label>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="severity" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Severity on Hit</label>
+    <source_model>Merlin\IntrusionDetection\Model\Config\Source\Severity</source_model>
+  </field>
+
+  <field id="allowed_hosts" translate="label comment" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Allowed Host headers (one per line or comma-separated)</label>
+    <comment>e.g. example.com, www.example.com. Leave empty to allow any Host.</comment>
+  </field>
+
+  <field id="forbid_ip_host" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Forbid IP Host header</label>
+    <comment>Block when Host is a raw IP address unless explicitly allowed above.</comment>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="trusted_proxy_cidrs" translate="label comment" type="textarea" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Trusted Proxy CIDRs for X-Forwarded-For</label>
+    <comment>Last hop in XFF must be in these CIDRs. Leave empty to skip this check.</comment>
+  </field>
+
+  <field id="disallow_private_client_ip" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Disallow private/reserved client IP in XFF</label>
+    <comment>Reject XFF if the left-most client IP is private/reserved.</comment>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="require_accept" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Require Accept header (GET/HEAD)</label>
+    <comment>Flag requests missing an Accept header.</comment>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="required_accept_tokens" translate="label comment" type="textarea" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Expected Accept substrings</label>
+    <comment>Any of these substrings must appear in Accept (comma/newline). e.g. text/html, application/xhtml+xml</comment>
+  </field>
+</group>
+      <!-- ===========================
+          Checkout Abuse!!
+      ============================ -->
+  <group id="checkout_abuse" translate="label" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+  <label>Checkout Abuse</label>
+
+  <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Enable</label>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="severity" translate="label" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Severity on Hit</label>
+    <source_model>Merlin\IntrusionDetection\Model\Config\Source\Severity</source_model>
+  </field>
+
+  <field id="window_minutes" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Window (minutes)</label>
+    <comment>Lookback window for velocity checks.</comment>
+    <validate>validate-number</validate>
+  </field>
+
+  <field id="ip_fail_threshold" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>IP Failure Threshold</label>
+    <comment>Block/log if a single IP hits this many failed attempts in the window.</comment>
+    <validate>validate-number</validate>
+  </field>
+
+  <field id="bin_threshold" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>BIN Velocity Threshold</label>
+    <comment>Max attempts across site for the same BIN in the window.</comment>
+    <validate>validate-number</validate>
+  </field>
+
+  <field id="avs_fail_threshold" translate="label comment" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>AVS Failure Threshold</label>
+    <comment>Total AVS failures across site in window (0 to disable).</comment>
+    <validate>validate-number</validate>
+  </field>
+
+  <field id="cvv_fail_threshold" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>CVV Failure Threshold</label>
+    <comment>Total CVV failures across site in window (0 to disable).</comment>
+    <validate>validate-number</validate>
+  </field>
+</group>
+           
+      <!-- ===========================
+          Diagnostic testing
+      ============================ -->
+
+<group id="diagnostics" translate="label" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+  <label>Diagnostics</label>
+
+  <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Enable Diagnostic Endpoint</label>
+    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+  </field>
+
+  <field id="secret" translate="label comment" type="obscure" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+    <label>Diagnostic Secret</label>
+    <comment>Required as ?secret=... to access /merlin_ids/diag/index</comment>
+  </field>
+</group>
+
     </section>
   </system>
 </config>

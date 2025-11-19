@@ -1,27 +1,14 @@
 <?php
+declare(strict_types=1);
+
 namespace Merlin\IntrusionDetection\Model;
 
-use Merlin\IntrusionDetection\Model\EventLogFactory;
-use Merlin\IntrusionDetection\Model\ResourceModel\EventLog as EventResource;
-
-class EventLogger
-{
-    public function __construct(
-        private EventLogFactory $eventFactory,
-        private EventResource $eventResource
-    ) {}
-
-    public function log(string $detector, string $severity, string $ip, string $path, ?string $ua, ?string $details = null): void
-    {
-        $event = $this->eventFactory->create();
-        $event->setData([
-            'ip' => $ip,
-            'path' => $path,
-            'user_agent' => $ua,
-            'detector' => $detector,
-            'severity' => $severity,
-            'details' => $details,
-        ]);
-        $this->eventResource->save($event);
+class EventLogger {
+    private $factory; private $resource;
+    public function __construct(\Merlin\IntrusionDetection\Model\EventLogFactory $factory, \Merlin\IntrusionDetection\Model\ResourceModel\EventLog $resource){ $this->factory=$factory; $this->resource=$resource; }
+    public function log(string $detector, string $severity, string $ip, string $path, string $ua = null, ?string $details = null): void {
+        $m = $this->factory->create();
+        $m->setData(['detector'=>$detector,'severity'=>$severity,'ip'=>$ip,'path'=>$path,'user_agent'=>$ua,'details'=>$details]);
+        try { $this->resource->save($m); } catch (\Exception $e) {}
     }
 }

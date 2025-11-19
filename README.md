@@ -1,5 +1,94 @@
 An extensible, defense‑in‑depth Intrusion Detection & Prevention module for Magento 2.
 
+
+v3.1.0
+
+Add extensive tests to check each detector
+
+
+#v3.0.0
+
+Added Checkout abuse detection for carding/BIN velocity, failed AVS/CVV spikes.
+
+#v2.2.9
+
+Added Header Sanity Detector
+
+Invalid Host (not in your allowed hosts)
+
+Spoofed X-Forwarded-For (untrusted client injecting IPs or malformed chain)
+
+Missing/odd Accept (bots/tools that don’t send typical browser Accepts)
+
+
+#v2.2.8
+
+Add GeoIP velocity checks, i.e. sudden country jumps per session/IP.
+
+Notes / Safety
+
+We intentionally don’t block on mobile tower drift by requiring min_distance_km (500km default). Tune per your risk appetite.
+
+
+Private/reserved IPs are ignored; add corporate/VPN egress ranges to Ignore CIDRs. No external calls — everything is local → fast and privacy-safe.
+
+
+#v2.2.7
+
+
+Add an editable, comma-separated allow-list of excluded paths in system config (so 3DS and 3rd party extensions, example: Amasty GDPR cookie endpoints won’t be inspected/blocked) 
+
+#v2.2.6
+
+Add block IP button on Blocked IP's grid, add delete and mass delete and add a form to add new ip's.
+
+
+#v2.2.5
+
+
+Fix config.xml
+
+
+#v2.2.4
+
+
+New: Added a nice clean block page with contact details rather than the one line error message "An error has happened during application run. See exception log for details."
+
+
+#v2.2.3
+
+
+Fixed not blocking ip addresses
+
+
+Fixed not removing expired ip's
+
+
+Fixed logging
+
+
+Added whitelist.
+
+#v2.0.0
+Refactor extension to fix grids not loading
+
+#v1.1.1
+
+Fix: On re-install we see "SQLSTATE[42000]: Syntax error or access violation: 1061 Duplicate key name 'MERLIN_INTRUSION_EVENT_IP', query was: ALTER TABLE merlin_intrusion_event ADD INDEX MERLIN_INTRUSION_EVENT_IP (ip), ADD INDEX MERLIN_INTRUSION_EVENT_CREATED_AT (created_at)"
+SQLSTATE[42000]: Syntax error or access violation: 1061 Duplicate key name 'MERLIN_BLOCKED_IP_IP', query was: ALTER TABLE merlin_blocked_ip ADD INDEX MERLIN_BLOCKED_IP_IP (ip), ADD INDEX MERLIN_BLOCKED_IP_EXPIRES_AT (expires_at)
+
+#v1.1.0
+
+Fix: Fix ACL Permissions for events and blocks
+
+Fix: Safety fix: the IDS no longer blocks inside the **adminhtml** area to prevent lockouts
+
+New: Added Full Admin Grids for **Intrusion Events** and **Blocked IPs** (with CRUD + mass delete).
+
+#v1.0.0
+
+Initial Release
+
 My initial release focuses on safe, composable primitives: request inspection, brute‑force throttling, IP blocking, honeypots, event logging, and admin/system configuration. It’s built to be production‑ready but conservative by default. You can extend each detector via DI.
 
 # Setup & usage
@@ -13,13 +102,60 @@ My initial release focuses on safe, composable primitives: request inspection, b
 - `bin/magento merlin:id:unblock-ip 1.2.3.4`
 - `bin/magento merlin:id:list-blocked`
 
+6) Tests
+Example runs for each detector
+
+HeaderSanity
+
+bin/magento merlin:ids:test --scenario=headers
 
 
-# Roadmap & Feature Ideas (extensible via additional Detectors)
+IpBlockDetector (first block an IP in your grid)
+
+bin/magento merlin:ids:test --scenario=ipblock --ip=198.51.100.66
 
 
-- **GeoIP velocity checks**: sudden country jumps per session/IP.
-- **Header sanity**: invalid Host, spoofed X-Forwarded-For, missing Accept headers.
+HoneypotDetector
+
+bin/magento merlin:ids:test --scenario=honeypot
+
+
+PathAnomalyDetector
+
+bin/magento merlin:ids:test --scenario=path-anomaly
+
+
+SimpleSqlInjectionDetector
+
+bin/magento merlin:ids:test --scenario=path-sqli
+
+
+RateLimitDetector (repeat N times; adjust thresholds/window if needed)
+
+bin/magento merlin:ids:test --scenario=rate-limit --repeat=20 --sleep=0.05
+
+
+UserAgentDetector
+
+bin/magento merlin:ids:test --scenario=useragent-bot
+
+
+GeoVelocityDetector (simulate GB→US jump for same IP)
+
+bin/magento merlin:ids:test --scenario=geo-jump --geo-seed-country=GB --geo-now-country=US
+
+
+CheckoutAbuseDetector (it reads DB/logged attempts; still useful to ensure it runs on paymentish routes)
+
+bin/magento merlin:ids:test --scenario=checkout-abuse
+
+
+
+# Roadmap & Feature Ideas
+
+
+DONE **GeoIP velocity checks**: sudden country jumps per session/IP. 
+DONE **Header sanity**: invalid Host, spoofed X-Forwarded-For, missing Accept headers.
 - **GraphQL & REST hardening**: schema‑aware allowlists, depth/complexity limits.
 - **File upload guard**: MIME sniffing, extension allowlist, scan via ClamAV/ICAP.
 - **Admin path cloak**: randomize backend path detection + decoy endpoints.
@@ -27,10 +163,9 @@ My initial release focuses on safe, composable primitives: request inspection, b
 - **Behavioral bot scoring**: sliding window + exponential backoff blocking.
 - **Reputation lists**: optional integration with AbuseIPDB/Spamhaus (cachable, privacy‑aware).
 - **CSP & security headers**: auto‑inject recommended headers with per‑route overrides.
-- **Checkout abuse detection**: carding/BIN velocity, failed AVS/CVV spikes.
+DONE - **Checkout abuse detection**: carding/BIN velocity, failed AVS/CVV spikes.
 - **Captcha on demand**: trigger Captcha only when a risk score threshold is hit.
-- **Webhook to SIEM**: stream `merlin_intrusion_event` to Splunk/ELK via queue.
-- **Admin grids**: UI for Events & Blocked IPs with export, bulk actions.
+DONE - **Admin grids**: UI for Events & Blocked IPs with bulk actions.
 - **Decoy admin users**: honey‑credentials to instantly flag attackers.
 - **Inventory of scanners**: rolling UA/IP fingerprints to preemptively tarp.
 

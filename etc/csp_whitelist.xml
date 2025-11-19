@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp/etc/csp_whitelist.xsd">
+<!-- use this file to whitelist any domains neeeded for scripts, frames, sytles, etc -->
+<policies>
+
+  <!-- Allow 3DS challenge iFrames -->
+  <policy id="frame-src">
+    <values>
+      <value id="sagepay-test" type="host">https://test.sagepay.com</value>
+      <value id="sagepay-wild" type="host">https://*.sagepay.com</value>
+      <value id="opayo-uk"    type="host">https://*.opayo.co.uk</value>
+      <value id="opayo-eu"    type="host">https://*.opayo.eu</value>
+    </values>
+  </policy>
+
+  <!-- Some ACS pages inline/host scripts; loosen if needed -->
+  <policy id="script-src">
+    <values>
+      <value id="sagepay-test" type="host">https://test.sagepay.com</value>
+      <value id="sagepay-wild" type="host">https://*.sagepay.com</value>
+      <value id="opayo-uk"    type="host">https://*.opayo.co.uk</value>
+      <value id="opayo-eu"    type="host">https://*.opayo.eu</value>
+    </values>
+  </policy>
+
+  <!-- Some ACS flows style in-frame -->
+  <policy id="style-src">
+    <values>
+      <value id="sagepay-test" type="host">https://test.sagepay.com</value>
+      <value id="sagepay-wild" type="host">https://*.sagepay.com</value>
+      <value id="opayo-uk"    type="host">https://*.opayo.co.uk</value>
+      <value id="opayo-eu"    type="host">https://*.opayo.eu</value>
+    </values>
+  </policy>
+
+
+</policies>
+
+</csp_whitelist>
